@@ -1,6 +1,7 @@
 import '@styles/globals.css'
 import { Inter } from 'next/font/google'
 import Nav from '@components/Nav'
+import Provider from './context/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,8 +18,10 @@ export default function RootLayout({ children }) {
             <div className="gradient" />
         </div>
         <div className="app">
-          <Nav />
-          {children}
+          <Provider>
+            <Nav />
+            {children}
+          </Provider>
         </div>
         </body>
     </html>
