@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 
-@tailwind base;
+/* @tailwind base; */
 @tailwind components;
 @tailwind utilities;
 
@@ -80,6 +80,6 @@ body {
 }
 
 .navbar {
-  @apply flex justify-between items-center w-full
+  @apply flex justify-between items-center w-full absolute top-0
 }
 

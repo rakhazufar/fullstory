@@ -4,8 +4,7 @@ import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@app/libs/prismadb";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-
-
+import bcrypt from 'bcrypt';
 
 export const authOptions = {
     adapter: PrismaAdapter(prisma),
@@ -26,8 +25,30 @@ export const authOptions = {
                 username: {label: "Username", type: "username", placeholder: "rakhazufar"}
             },
             async authorize(credentials) {
-                const user = {id: 1, name: "rakha", email: "rakhazufar@gmail.com"}
-                return user;
+
+                //check if user provide an email and password
+                if(!credentials.email || !credentials.password) {
+                    throw new Error('Missing Fields')
+                }
+
+                //check if user exist
+                const user = await prisma.user.findUnique({
+                    where: {
+                        email: credentials.email
+                    }
+                });
+
+                if(!user || !user?.hashedPassword ) {
+                    throw new Error('User Not Found')
+                }
+
+                const passwordMatch = await bcrypt.compare(credentials.password, user.hashedPassword)
+
+                if(!passwordMatch) {
+                    throw new Error('Incorrect Password')
+                }
+
+                return user
             }
         })
     ],

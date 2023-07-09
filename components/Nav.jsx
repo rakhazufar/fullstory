@@ -11,7 +11,7 @@ import Link from "next/link"
 
 const Nav = () => {
   return (
-    <nav className="navbar py-4">
+    <nav className="navbar py-4 px-16">
       <Link href="/">
         <Image src={Logo} width={120} className="cursor-pointer" />
       </Link>

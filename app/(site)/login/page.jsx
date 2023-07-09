@@ -3,7 +3,6 @@
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import axios from 'axios';
 import Alert from '@mui/material/Alert';
 import Link from 'next/link';
 import Paper from '@mui/material/Paper';
@@ -11,7 +10,23 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import {useState, useEffect} from 'react'
+import { signIn } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+
+function Copyright(props) {
+  return (
+    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+      {'Copyright © '}
+      <Link color="inherit" href="https://mui.com/">
+        Rakha Zufar
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
+
+// TODO remove, this demo shouldn't need to reset the theme.
 
 const defaultTheme = createTheme();
 
@@ -19,25 +34,29 @@ export default function SignInSide() {
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [saverity, setSaverity] = useState('')
-  const [data, setData] = useState({name: '', email: '', password: ''})
-  
+  const [data, setData] = useState({ email: '', password: ''})
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    axios.post('/api/register', data)
-    .then((res)=>{
-      setAlertMessage('User has been registered')
-      setSaverity('success')
-      setShowAlert(true)
+    signIn('credentials', {...data, redirect: false})
+    .then((callback)=>{
+        if(callback?.error) {
+            setAlertMessage(callback.error)
+            setSaverity('error')
+            setShowAlert(true)
+        }
+
+        if(callback?.ok && !callback?.error) {
+            setAlertMessage('User has been login')
+            setSaverity('success')
+            setShowAlert(true)
+        }
     })
-    .catch((err)=>{
-      setAlertMessage(err.response.data)
-      setSaverity('error')
-      setShowAlert(true)
-  })
+    .finally(()=>{
+        setData({ email: '', password: ''})
+    })
   }
 
-
-  
   useEffect(()=>{
     const closeAlert = setTimeout(()=>{
         setShowAlert(false)
@@ -75,27 +94,12 @@ export default function SignInSide() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyItems: 'center'
             }}
           >
-            {/* <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-              <LockOutlinedIcon />
-            </Avatar> */}
-            <Typography component="h1" variant="h5"sx={{ mt: 8}}>
-              Register
+            <Typography component="h1" variant="h5" pt={10}>
+              Sign in
             </Typography>
             <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
-            <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="name"
-                label="Username"
-                name="name"
-                autoComplete="name"
-                autoFocus
-                onChange={e=> setData({...data, name: e.target.value})}
-              />
               <TextField
                 margin="normal"
                 required
@@ -104,6 +108,8 @@ export default function SignInSide() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                autoFocus
+                value={data.email}
                 onChange={e=> setData({...data, email: e.target.value})}
               />
               <TextField
@@ -114,8 +120,9 @@ export default function SignInSide() {
                 label="Password"
                 type="password"
                 id="password"
-                onChange={e=> setData({...data, password: e.target.value})}
+                value={data.password}
                 autoComplete="current-password"
+                onChange={e=> setData({...data, password: e.target.value})}
               />
               {/* <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
@@ -127,19 +134,25 @@ export default function SignInSide() {
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
               >
-                Register
+                Sign In
               </Button>
               <Grid container>
+                {/* <Grid item xs>
+                  <Link href="#" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid> */}
                 <Grid item>
-                  <Link href="/login" variant="body2">
-                    {"Do you have an account? Sign In"}
+                  <Link href="/register" variant="body2">
+                    {"Don't have an account? Sign Up"}
                   </Link>
                 </Grid>
               </Grid>
+              <Copyright sx={{ mt: 5 }} />
             </Box>
             {
                 showAlert && (
-                <Alert severity={saverity} variant="filled">
+                <Alert severity={saverity} variant="filled" >
                     {alertMessage}
                 </Alert>
                 )
