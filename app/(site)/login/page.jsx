@@ -12,21 +12,7 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { signIn } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Rakha Zufar
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
-
-// TODO remove, this demo shouldn't need to reset the theme.
+import { useRouter } from 'next/navigation';
 
 const defaultTheme = createTheme();
 
@@ -35,6 +21,7 @@ export default function SignInSide() {
   const [alertMessage, setAlertMessage] = useState('')
   const [saverity, setSaverity] = useState('')
   const [data, setData] = useState({ email: '', password: ''})
+  const { push } = useRouter();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -50,6 +37,7 @@ export default function SignInSide() {
             setAlertMessage('User has been login')
             setSaverity('success')
             setShowAlert(true)
+            push('/');
         }
     })
     .finally(()=>{
@@ -124,10 +112,6 @@ export default function SignInSide() {
                 autoComplete="current-password"
                 onChange={e=> setData({...data, password: e.target.value})}
               />
-              {/* <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              /> */}
               <Button
                 type="submit"
                 fullWidth
@@ -137,18 +121,12 @@ export default function SignInSide() {
                 Sign In
               </Button>
               <Grid container>
-                {/* <Grid item xs>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
-                </Grid> */}
                 <Grid item>
                   <Link href="/register" variant="body2">
                     {"Don't have an account? Sign Up"}
                   </Link>
                 </Grid>
               </Grid>
-              <Copyright sx={{ mt: 5 }} />
             </Box>
             {
                 showAlert && (

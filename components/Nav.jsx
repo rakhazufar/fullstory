@@ -2,59 +2,139 @@
 
 import Image from "next/image"
 import Logo from "@public/assets/images/Fullstory.svg"
-import { Button, FormControl, InputLabel, OutlinedInput } from "@mui/material"
+import Button from "@mui/material/Button"
 import Link from "next/link"
-// import InputAdornment from '@mui/material/InputAdornment';
-// import SearchIcon from '@mui/icons-material/Search';
-// import IconButton from '@mui/material/IconButton';
+import { useState } from "react"
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
+import Container from '@mui/material/Container';
+import Tooltip from '@mui/material/Tooltip';
+import MenuItem from '@mui/material/MenuItem';
+import Avatar from "@mui/material/Avatar"
+
+import { useSession, signOut } from "next-auth/react"
 
 
-const Nav = () => {
+function ResponsiveAppBar() {
+  const [anchorElUser, setAnchorElUser] = useState(null);
+
+  const { data: session } = useSession()
+
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   return (
-    <nav className="navbar py-4 px-16">
-      <Link href="/">
-        <Image src={Logo} width={120} className="cursor-pointer" />
-      </Link>
-        
-
-        {/* <div className="searchInput"> */}
-            {/* <TextField id="outlined-basic" inputProps={{
-                endAdornment: (
-                    <InputAdornment>
-                      <IconButton>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  )
-            }} label="Cari post atau user..." variant="outlined" /> */}
-        {/* <FormControl sx={{ mt: 1, width: '30vw'}} size="small" variant="outlined">
-          <InputLabel htmlFor="Search...">Search...</InputLabel>
-          <OutlinedInput
-            id="Search..."
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  edge="end"
-                >
-                  <SearchIcon />
-                </IconButton>
-              </InputAdornment>
-            }
-            label="Search"
-          />
-          </FormControl>
-        </div> */}
-
-        <div className="Login flex gap-5">
-          <Link href="/login">
-            <Button variant="contained" color="primary" sx={ { borderRadius: 28 } }>Sign In</Button>
+    <AppBar position="static" elevation={0} className="navbar" style={{ background: '#ffffff00' }}>
+      <Container maxWidth="xl">
+        <Toolbar disableGutters style={{ display: 'flex', justifyContent: 'space-between'}}>
+          <Link href="/">
+            <Image src={Logo} width={120} className="cursor-pointer" />
           </Link>
-          <Link href="/register">
-            <Button variant="outlined" color="primary" sx={ { borderRadius: 28 } }>Register</Button>
-          </Link>
-        </div>
-    </nav>
-  )
+
+          {/* Web */}
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              gap: 2
+            }}
+          >
+                {session ? (
+                    <Button
+                      variant="contained"
+                      onClick={() => signOut({ callbackUrl: 'http://localhost:3000' })}
+                      color="primary"
+                      sx={ { borderRadius: 28, width: 120 } }>
+                        Sign Out
+                    </Button>
+                ) : (
+                  <Box
+                  sx={{
+                    display: 'flex',
+                    gap: 2
+                  }}
+                  >
+                      <Link href="/login">
+                        <Button variant="contained" color="primary" sx={ { borderRadius: 28, width: 120 } }>Sign In</Button>
+                      </Link>
+                      <Link href="/register">
+                        <Button variant="outlined" color="primary" sx={ { borderRadius: 28, width: 120 } }>Register</Button>
+                      </Link>
+                  </Box>
+                )}
+          </Box>
+
+          {/* Mobile */}
+          <Box sx={{ flexGrow: 0,  display: { xs: 'flex', md: 'none' } }}>
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }} >
+                {session ? (
+                  <Avatar
+                    sx={{ width: 35, height: 35 }}
+                  >
+                    {session?.user.name[0].toUpperCase()}
+                  </Avatar> 
+                ) : (
+                  <MenuIcon />
+                )}
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: '45px', display: 'flex', alignItems: 'flex-end'}}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+
+              {session ? (
+                <MenuItem onClick={handleCloseUserMenu}>
+                    <Button
+                      variant="contained"
+                      onClick={() => signOut({ callbackUrl: 'http://localhost:3000' })}
+                      color="primary"
+                      sx={ { borderRadius: 28, width: 120 } }>
+                        Sign Out
+                    </Button>
+                </MenuItem>
+                ) : (
+                  <Box>
+                    <MenuItem onClick={handleCloseUserMenu}>
+                      <Link href="/login">
+                        <Button variant="contained" color="primary" sx={ { borderRadius: 28, width: 120 } }>Sign In</Button>
+                      </Link>
+                    </MenuItem>
+                    <MenuItem onClick={handleCloseUserMenu}>
+                      <Link href="/register">
+                        <Button variant="outlined" color="primary" sx={ { borderRadius: 28, width: 120 } }>Register</Button>
+                      </Link>
+                    </MenuItem>
+                  </Box>
+                )}
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
+  );
 }
 
-export default Nav
+
+export default ResponsiveAppBar;
