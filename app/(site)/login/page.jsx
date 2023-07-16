@@ -9,6 +9,8 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import GoogleIcon from '@mui/icons-material/Google'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { signIn } from 'next-auth/react';
 import { useState, useEffect } from 'react';
@@ -16,7 +18,7 @@ import { useRouter } from 'next/navigation';
 
 const defaultTheme = createTheme();
 
-export default function SignInSide() {
+export default function SignInSide({searchParams}) {
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [saverity, setSaverity] = useState('')
@@ -27,6 +29,7 @@ export default function SignInSide() {
     event.preventDefault();
     signIn('credentials', {...data, redirect: false})
     .then((callback)=>{
+      console.log(callback)
         if(callback?.error) {
             setAlertMessage(callback.error)
             setSaverity('error')
@@ -55,6 +58,13 @@ export default function SignInSide() {
     }
   }, [showAlert])
   
+  useEffect(()=>{
+    if(searchParams?.method === 'user_already_registered') {
+      setAlertMessage('User Already Registeed with Other Method')
+      setSaverity('error')
+      setShowAlert(true)
+    }
+  }, [])
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -120,9 +130,26 @@ export default function SignInSide() {
               >
                 Sign In
               </Button>
+              <Box sx={{width: '100%', height: 2, backgroundColor: 'gray'}} />
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={()=>signIn('github')}
+                sx={{ mt: 2, mb: 2, backgroundColor: 'black'}}
+                endIcon={<GitHubIcon />}>
+                Github Login
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={()=>signIn('google')}
+                sx={{ mb: 2, backgroundColor: 'red'}}
+                endIcon={<GoogleIcon />}>
+                Google Login
+              </Button>
               <Grid container>
                 <Grid item>
-                  <Link href="/register" variant="body2">
+                  <Link href="/register" sx={{ mt: 3, mb: 2 }} variant="body2">
                     {"Don't have an account? Sign Up"}
                   </Link>
                 </Grid>

@@ -77,11 +77,18 @@ function ResponsiveAppBar() {
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }} >
                 {session ? (
-                  <Avatar
+                  session.user?.image ? (
+                    <Avatar
+                      sx={{ width: 35, height: 35 }}
+                      src={session.user.image}
+                    />
+                  ) : (
+                    <Avatar
                     sx={{ width: 35, height: 35 }}
-                  >
-                    {session?.user.name[0].toUpperCase()}
-                  </Avatar> 
+                    >
+                      {session?.user.name[0].toUpperCase()}
+                    </Avatar> 
+                  )
                 ) : (
                   <MenuIcon />
                 )}

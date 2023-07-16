@@ -8,11 +8,31 @@ import bcrypt from 'bcrypt';
 
 export const authOptions = {
     adapter: PrismaAdapter(prisma),
+    callbacks: {
+        async signIn({ user, account, credentials }) {
+            try {
+              if (user.email && account.provider !== "credentials") {
+                const existingUser = await prisma.user.findUnique({
+                  where: {
+                    email: user.email,
+                  },
+                });
+                if (existingUser) {
+                  return 'http://localhost:3000/login?method=user_already_registered'
+                }
+              }
+            } catch (error) {
+              console.log("error:", error.message);
+            }
+        
+            return true;
+          }
+    },
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        }), 
+        }),
         GithubProvider({
             clientId: process.env.GITHUB_ID,
             clientSecret: process.env.GITHUB_CLIENT_SECRET,
