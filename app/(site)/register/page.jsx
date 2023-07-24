@@ -11,15 +11,19 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import {useState, useEffect} from 'react'
+import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation';
 
-const defaultTheme = createTheme();
 
 export default function SignInSide() {
   const [showAlert, setShowAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
   const [saverity, setSaverity] = useState('')
   const [data, setData] = useState({name: '', email: '', password: ''})
+
+  const router = useRouter();
+  const { data: session, status } = useSession()
   
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -36,7 +40,12 @@ export default function SignInSide() {
   })
   }
 
-
+    //Protect page
+    useEffect(()=>{
+      if (status === "authenticated") {
+        router.push('/')
+      }
+    }, [status])
   
   useEffect(()=>{
     const closeAlert = setTimeout(()=>{
@@ -50,7 +59,6 @@ export default function SignInSide() {
   
 
   return (
-    <ThemeProvider theme={defaultTheme}>
       <Grid container component="main" sx={{ height: '100vh', width: '100vw' }}>
         <CssBaseline />
         <Grid
@@ -147,6 +155,5 @@ export default function SignInSide() {
           </Box>
         </Grid>
       </Grid>
-    </ThemeProvider>
   );
 }

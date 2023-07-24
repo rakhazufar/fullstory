@@ -15,13 +15,16 @@ import Container from '@mui/material/Container';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Avatar from "@mui/material/Avatar"
+import Typhography from "@mui/material/Typography"
 
 import { useSession, signOut } from "next-auth/react"
+import { useRouter, usePathname } from "next/navigation"
 
 
 function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = useState(null);
-
+  const router = useRouter()
+  const pathname = usePathname()
   const { data: session } = useSession()
 
   const handleOpenUserMenu = (event) => {
@@ -33,7 +36,7 @@ function ResponsiveAppBar() {
   };
 
   return (
-    <AppBar position="static" elevation={0} className="navbar" style={{ background: '#ffffff00' }}>
+    <AppBar position="fixed" elevation={0} style={{ backgroundColor: pathname === '/' ? 'white' : 'transparent' }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters style={{ display: 'flex', justifyContent: 'space-between'}}>
           <Link href="/">
@@ -48,13 +51,24 @@ function ResponsiveAppBar() {
             }}
           >
                 {session ? (
-                    <Button
-                      variant="contained"
-                      onClick={() => signOut({ callbackUrl: 'http://localhost:3000' })}
-                      color="primary"
-                      sx={ { borderRadius: 28, width: 120 } }>
-                        Sign Out
-                    </Button>
+                  <Box>
+                    <Tooltip title="Open settings">
+                      <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }} >
+                        {session.user?.image ? (
+                          <Avatar
+                            sx={{ width: 35, height: 35 }}
+                            src={session.user.image}
+                          />
+                        ) : (
+                          <Avatar
+                          sx={{ width: 35, height: 35 }}
+                          >
+                            {session?.user.name[0].toUpperCase()}
+                          </Avatar> 
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 ) : (
                   <Box
                   sx={{
@@ -112,15 +126,25 @@ function ResponsiveAppBar() {
             >
 
               {session ? (
-                <MenuItem onClick={handleCloseUserMenu}>
-                    <Button
-                      variant="contained"
-                      onClick={() => signOut({ callbackUrl: 'http://localhost:3000' })}
-                      color="primary"
-                      sx={ { borderRadius: 28, width: 120 } }>
-                        Sign Out
-                    </Button>
-                </MenuItem>
+                <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                  <MenuItem onClick={()=>{
+                    handleCloseUserMenu()
+                    router.push('/profile')
+                    }} >
+                    <Typhography align="center"  variant="body1" sx={ { borderRadius: 28, width: 120 } }>
+                        Profile
+                    </Typhography>
+                  </MenuItem>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                      <Button
+                        variant="contained"
+                        onClick={() => signOut({ callbackUrl: 'http://localhost:3000' })}
+                        color="primary"
+                        sx={ { borderRadius: 28, width: 120 } }>
+                          Sign Out
+                      </Button>
+                  </MenuItem>
+                </Box>
                 ) : (
                   <Box>
                     <MenuItem onClick={handleCloseUserMenu}>

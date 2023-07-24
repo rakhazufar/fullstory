@@ -9,23 +9,36 @@ import bcrypt from 'bcrypt';
 export const authOptions = {
     adapter: PrismaAdapter(prisma),
     callbacks: {
-        async signIn({ user, account, credentials }) {
+        async signIn({ user, account, profile, email, credentials  }) {
             try {
-              if (user.email && account.provider !== "credentials") {
                 const existingUser = await prisma.user.findUnique({
-                  where: {
-                    email: user.email,
-                  },
+                    where: {
+                      email: user.email,
+                    }
                 });
-                if (existingUser) {
-                  return 'http://localhost:3000/login?method=user_already_registered'
-                }
+
+                const oauthAccount = await prisma.account.findFirst({
+                    where: {
+                        userId: existingUser.id
+                    }
+                })
+
+              if (oauthAccount && account.provider === "credentials") {
+                return 'http://localhost:3000/login?method=user_already_registered'
               }
+
+              if(account.type === "oauth" && !oauthAccount ) {
+                return 'http://localhost:3000/login?method=user_already_registered'
+              }
+              
             } catch (error) {
               console.log("error:", error.message);
             }
         
             return true;
+          },
+          async redirect({ url, baseUrl }) {
+            return baseUrl
           }
     },
     providers: [
@@ -73,6 +86,9 @@ export const authOptions = {
         })
     ],
     secret: process.env.SECRET,
+    pages: {
+        signIn: '/login'
+    },
     session: {
         strategy: "jwt"
     },

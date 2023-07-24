@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import GoogleIcon from '@mui/icons-material/Google'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -23,7 +23,8 @@ export default function SignInSide({searchParams}) {
   const [alertMessage, setAlertMessage] = useState('')
   const [saverity, setSaverity] = useState('')
   const [data, setData] = useState({ email: '', password: ''})
-  const { push } = useRouter();
+  const router = useRouter();
+  const { data: session, status } = useSession()
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -40,7 +41,7 @@ export default function SignInSide({searchParams}) {
             setAlertMessage('User has been login')
             setSaverity('success')
             setShowAlert(true)
-            push('/');
+            router.push('/');
         }
     })
     .finally(()=>{
@@ -57,7 +58,14 @@ export default function SignInSide({searchParams}) {
         clearTimeout(closeAlert)
     }
   }, [showAlert])
-  
+
+  //Protect page
+  useEffect(()=>{
+    if (status === "authenticated") {
+      router.push('/')
+    }
+  }, [status])
+
   useEffect(()=>{
     if(searchParams?.method === 'user_already_registered') {
       setAlertMessage('User Already Registeed with Other Method')
