@@ -1,42 +1,42 @@
-import bcrypt from 'bcrypt'
-import prisma from '../../libs/prismadb'
-import { NextResponse } from 'next/server'
+import bcrypt from "bcrypt";
+import prisma from "../../libs/prismadb";
+import { NextResponse } from "next/server";
 
 function exclude(user, keys) {
-    return Object.fromEntries(
-      Object.entries(user).filter(([key]) => !keys.includes(key))
-    );
+  return Object.fromEntries(
+    Object.entries(user).filter(([key]) => !keys.includes(key))
+  );
+}
+
+export async function POST(request) {
+  const body = await request.json();
+  const { name, email, password } = body;
+
+  if (!name || !email || !password) {
+    return new NextResponse("Missing Fields", { status: 400 });
   }
 
-export async function POST(request){
-    const body = await request.json();
-    const { name, email, password } = body;
+  const exist = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
 
-    if(!name || !email || !password) {
-        return new NextResponse('Missing Fields', { status: 400 })
-    }
+  if (exist) {
+    return new NextResponse("User already exist", { status: 409 });
+  }
 
-    const exist = await prisma.user.findUnique({
-        where: {
-            email
-        }
-    });
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    if(exist) {
-        return new NextResponse('User already exist', { status: 409 })
-    }
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email,
+      hashedPassword,
+    },
+  });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const userWithoutPassword = exclude(user, ["hashedPassword"]);
 
-    const user = await prisma.user.create({
-        data: {
-            name,
-            email,
-            hashedPassword
-        }
-    });
-
-    const userWithoutPassword = exclude(user, ['hashedPassword'])
-
-    return NextResponse.json(userWithoutPassword)
+  return NextResponse.json(userWithoutPassword);
 }
