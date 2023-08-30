@@ -1,30 +1,60 @@
 "use client";
 
-import {
-  Grid,
-  Typography,
-  CssBaseline,
-  Box,
-  Button,
-  Avatar,
-} from "@mui/material";
+import { Typography, CssBaseline, Box, Tabs, Tab, Avatar } from "@mui/material";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
-function Profile() {
-  const { data: session } = useSession();
+import { useState } from "react";
+import PropTypes from "prop-types";
 
+function CustomTabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 5 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+CustomTabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+
+function Profile() {
+  const [value, setValue] = useState(0);
+  const { data: session } = useSession();
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
   return (
     <Box
       container
       component="main"
       sx={{
-        width: "100vw",
         display: "flex",
         flexDirection: "column",
       }}
     >
       <CssBaseline />
-      <Grid
+      <Box
         xs={{
           height: "20vh",
         }}
@@ -102,24 +132,66 @@ function Profile() {
         {/* <Typography variant='h4' sx={{fontWeight: 100, color:'white'}} align='center'>
               {session?.user.name} 
           </Typography>           */}
-      </Grid>
+      </Box>
 
       {/* For post profile */}
-      <Grid
+      <Box
         sx={{
-          width: "100%",
+          width: "100vw",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           padding: 2,
-          marginTop: 10,
+          marginTop: {
+            lg: 13,
+            xs: 8,
+          },
         }}
       >
-        <Typography variant="h5">{session?.user.name} </Typography>
-      </Grid>
+        <Typography variant="h5" sx={{ fontSize: 20 }}>
+          {session?.user.name}
+        </Typography>
+        <Typography variant="h6" sx={{ fontSize: 14, color: "gray" }}>
+          {session?.user.email}
+        </Typography>
+      </Box>
 
       {/* Tabs, pakai MUI tabs */}
+      <Box
+        sx={{
+          backgroundColor: "whitesmoke",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          minHeight: "50vh",
+        }}
+      >
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          textColor="primary"
+          indicatorColor="primary"
+        >
+          <Tab {...a11yProps(0)} label="Item One" />
+          <Tab {...a11yProps(1)} label="Item Two" />
+          <Tab {...a11yProps(2)} label="Item Three" />
+        </Tabs>
+
+        {/* Panel Tabs */}
+        <Box>
+          <CustomTabPanel value={value} index={0}>
+            Item One
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={1}>
+            Item Two
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={2}>
+            Item Three
+          </CustomTabPanel>
+        </Box>
+      </Box>
     </Box>
   );
 }
