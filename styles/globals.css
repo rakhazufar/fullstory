@@ -4,7 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 body {
   box-sizing: border-box;
   margin: 0;
@@ -70,16 +69,14 @@ body {
 
 @media screen and (max-width: 640px) {
   .main {
-    padding: 0;
+    padding: 0 !important;
   }
 }
 
-
 .app {
-  @apply relative z-10 flex justify-center items-center flex-col mx-auto sm:px-16 px-6;
+  @apply relative z-10 flex justify-center items-center flex-col mx-auto;
 }
 
 .navbar {
-  @apply flex justify-between items-center w-full absolute top-0
+  @apply flex justify-between items-center w-full absolute top-0;
 }
-

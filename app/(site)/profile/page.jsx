@@ -1,48 +1,22 @@
 "use client";
 
-import { Typography, CssBaseline, Box, Tabs, Tab, Avatar } from "@mui/material";
+import { Typography, Box, Tabs, Tab, Avatar } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import PropTypes from "prop-types";
-
-function CustomTabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 5 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-CustomTabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-}
+import Posts from "@components/Post";
+import { useMyPosts } from "@hooks/usePosts";
 
 function Profile() {
-  const [value, setValue] = useState(0);
   const { data: session } = useSession();
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const email = session?.user.email;
+  const allPosts = useMyPosts({ email });
+
+  const myPosts = allPosts.filter((post) => post.author.email == email);
+  console.log(myPosts);
+  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+
+  const handleTabChange = (e, tabIndex) => {
+    setCurrentTabIndex(tabIndex);
   };
   return (
     <Box
@@ -51,9 +25,9 @@ function Profile() {
       sx={{
         display: "flex",
         flexDirection: "column",
+        width: "100%",
       }}
     >
-      <CssBaseline />
       <Box
         xs={{
           height: "20vh",
@@ -137,7 +111,6 @@ function Profile() {
       {/* For post profile */}
       <Box
         sx={{
-          width: "100vw",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -158,39 +131,25 @@ function Profile() {
       </Box>
 
       {/* Tabs, pakai MUI tabs */}
-      <Box
-        sx={{
-          backgroundColor: "whitesmoke",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          minHeight: "50vh",
-        }}
-      >
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          textColor="primary"
-          indicatorColor="primary"
-        >
-          <Tab {...a11yProps(0)} label="Item One" />
-          <Tab {...a11yProps(1)} label="Item Two" />
-          <Tab {...a11yProps(2)} label="Item Three" />
+      <Box>
+        <Tabs value={currentTabIndex} onChange={handleTabChange} centered>
+          <Tab label="Posts" />
+          <Tab label="Likes" />
+          <Tab label="Bookmark" />
         </Tabs>
-
-        {/* Panel Tabs */}
-        <Box>
-          <CustomTabPanel value={value} index={0}>
-            Item One
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={1}>
-            Item Two
-          </CustomTabPanel>
-          <CustomTabPanel value={value} index={2}>
-            Item Three
-          </CustomTabPanel>
-        </Box>
+      </Box>
+      {/* Content Tabs */}
+      <Box>
+        {/* Posts Contents */}
+        {currentTabIndex === 0 && (
+          <Box sx={{ p: 3, maxWidth: "100%" }}>
+            {myPosts ? (
+              myPosts.map((post) => <Posts key={post.id} data={post} />)
+            ) : (
+              <Typography>No Posts</Typography>
+            )}
+          </Box>
+        )}
       </Box>
     </Box>
   );
