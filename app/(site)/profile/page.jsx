@@ -4,15 +4,13 @@ import { Typography, Box, Tabs, Tab, Avatar } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import Posts from "@components/Post";
-import { useMyPosts } from "@hooks/usePosts";
+import { usePostsByUser, useLikedPostsByUser } from "@hooks/usePosts";
 
 function Profile() {
   const { data: session } = useSession();
   const email = session?.user.email;
-  const allPosts = useMyPosts({ email });
-
-  const myPosts = allPosts.filter((post) => post.author.email == email);
-  console.log(myPosts);
+  const allPosts = usePostsByUser({ email });
+  const likedPosts = useLikedPostsByUser({ email });
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
   const handleTabChange = (e, tabIndex) => {
@@ -143,8 +141,22 @@ function Profile() {
         {/* Posts Contents */}
         {currentTabIndex === 0 && (
           <Box sx={{ p: 3, maxWidth: "100%" }}>
-            {myPosts ? (
-              myPosts.map((post) => <Posts key={post.id} data={post} />)
+            {allPosts ? (
+              allPosts.map((post) => <Posts key={post.id} data={post} />)
+            ) : (
+              <Typography>No Posts</Typography>
+            )}
+          </Box>
+        )}
+      </Box>
+
+      {/* Liked Post */}
+      <Box>
+        {/* Posts Contents */}
+        {currentTabIndex === 1 && (
+          <Box sx={{ p: 3, maxWidth: "100%" }}>
+            {likedPosts ? (
+              likedPosts.map((post) => <Posts key={post.id} data={post} />)
             ) : (
               <Typography>No Posts</Typography>
             )}

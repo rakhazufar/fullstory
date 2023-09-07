@@ -7,8 +7,12 @@ export async function GET(request) {
   const email = params.get("email");
   console.log(email);
 
-  // function ini harus mereturn seluruh post yang dimiliki oleh user {email}
   const allPost = await prisma.post.findMany({
+    where: {
+      author: {
+        email,
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
