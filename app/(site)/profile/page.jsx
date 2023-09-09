@@ -5,12 +5,14 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import Posts from "@components/Post";
 import { usePostsByUser, useLikedPostsByUser } from "@hooks/usePosts";
+import { useBookmarkByUser } from "@hooks/useBookmark";
 
 function Profile() {
   const { data: session } = useSession();
   const email = session?.user.email;
   const allPosts = usePostsByUser({ email });
   const likedPosts = useLikedPostsByUser({ email });
+  const bookmarkedPost = useBookmarkByUser({ email });
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
   const handleTabChange = (e, tabIndex) => {
@@ -18,7 +20,6 @@ function Profile() {
   };
   return (
     <Box
-      container
       component="main"
       sx={{
         display: "flex",
@@ -59,7 +60,7 @@ function Profile() {
           {session?.user?.image ? (
             <Box
               component="img"
-              alt={session.user.name}
+              alt="photo profile"
               src={session.user.image}
               sx={{
                 height: {
@@ -141,10 +142,18 @@ function Profile() {
         {/* Posts Contents */}
         {currentTabIndex === 0 && (
           <Box sx={{ p: 3, maxWidth: "100%" }}>
-            {allPosts ? (
+            {allPosts.length != 0 ? (
               allPosts.map((post) => <Posts key={post.id} data={post} />)
             ) : (
-              <Typography>No Posts</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Typography>No Posts</Typography>
+              </Box>
             )}
           </Box>
         )}
@@ -155,10 +164,40 @@ function Profile() {
         {/* Posts Contents */}
         {currentTabIndex === 1 && (
           <Box sx={{ p: 3, maxWidth: "100%" }}>
-            {likedPosts ? (
+            {likedPosts.length != 0 ? (
               likedPosts.map((post) => <Posts key={post.id} data={post} />)
             ) : (
-              <Typography>No Posts</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Typography>No Posts</Typography>
+              </Box>
+            )}
+          </Box>
+        )}
+      </Box>
+
+      {/* Bookmarked Post */}
+      <Box>
+        {/* Posts Contents */}
+        {currentTabIndex === 2 && (
+          <Box sx={{ p: 3, maxWidth: "100%" }}>
+            {bookmarkedPost.length != 0 ? (
+              bookmarkedPost.map((post) => <Posts key={post.id} data={post} />)
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Typography>No Posts</Typography>
+              </Box>
             )}
           </Box>
         )}

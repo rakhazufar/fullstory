@@ -1,4 +1,4 @@
-import prisma from "../../../../libs/prismadb";
+import prisma from "../../../libs/prismadb";
 import { NextResponse } from "next/server";
 
 export async function GET(request) {
@@ -15,16 +15,16 @@ export async function GET(request) {
       },
     });
 
-    const likedPost = await prisma.like.findFirst({
+    const bookmarkedPost = await prisma.bookmark.findFirst({
       where: {
         userId: user.id,
         postId,
       },
     });
-    if (!likedPost) {
-      return NextResponse.json({ isLiked: false });
+    if (!bookmarkedPost) {
+      return NextResponse.json({ isBookmarked: false });
     }
-    return NextResponse.json({ isLiked: true });
+    return NextResponse.json({ isBookmarked: true });
   } catch (error) {
     console.error(error);
     return new NextResponse({ body: "Internal Server Error", status: 500 });
