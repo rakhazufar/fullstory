@@ -6,6 +6,7 @@ import { useState } from "react";
 import Posts from "@components/Post";
 import { usePostsByUser, useLikedPostsByUser } from "@hooks/usePosts";
 import { useBookmarkByUser } from "@hooks/useBookmark";
+import ProfilePicture from "@components/ProfilePicture";
 
 function Profile() {
   const { data: session } = useSession();
@@ -48,60 +49,7 @@ function Profile() {
           backgroundPosition: "center",
         }}
       >
-        <Box
-          sx={{
-            height: "inherit",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            alignItems: "center",
-          }}
-        >
-          {session?.user?.image ? (
-            <Box
-              component="img"
-              alt="photo profile"
-              src={session.user.image}
-              sx={{
-                height: {
-                  lg: 200,
-                  xs: 150,
-                },
-                width: {
-                  lg: 200,
-                  xs: 150,
-                },
-                mb: {
-                  lg: -13,
-                  xs: -9,
-                },
-                borderRadius: "170px",
-              }}
-            />
-          ) : (
-            <Avatar
-              sx={{
-                height: {
-                  lg: 200,
-                  xs: 150,
-                },
-                width: {
-                  lg: 200,
-                  xs: 150,
-                },
-                mb: {
-                  lg: -13,
-                  xs: -9,
-                },
-                margin: 2,
-              }}
-            >
-              <Typography variant="h2">
-                {session?.user.name[0].toUpperCase()}
-              </Typography>
-            </Avatar>
-          )}
-        </Box>
+        <ProfilePicture />
         {/* <Typography variant='h4' sx={{fontWeight: 100, color:'white'}} align='center'>
               {session?.user.name} 
           </Typography>           */}

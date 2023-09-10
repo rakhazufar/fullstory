@@ -38,7 +38,9 @@ function ResponsiveAppBar() {
     <AppBar
       position="fixed"
       elevation={0}
-      style={{ backgroundColor: pathname === "/" ? "white" : "transparent" }}
+      style={{
+        backgroundColor: "white",
+      }}
     >
       <Container maxWidth="xl">
         <Toolbar
