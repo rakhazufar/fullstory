@@ -26,3 +26,56 @@ export const useLikes = ({ postId, liked }) => {
 
   return totalLike;
 };
+
+export const useGetLikedValue = ({ postId, email, session, setLiked }) => {
+  useEffect(() => {
+    const checkLiked = async () => {
+      const Liked = await axios.get("/api/post/getLikedValue", {
+        params: {
+          postId,
+          email,
+        },
+      });
+
+      setLiked(Liked.data.isLiked);
+    };
+
+    checkLiked();
+  }, [session]);
+};
+
+export const useHandleLike = (initialState, postId, email) => {
+  const [liked, setLiked] = useState(initialState);
+
+  const handleLike = async (action) => {
+    if (action === "like") {
+      try {
+        const like = await axios.post("/api/post/like", {
+          postId,
+          email,
+        });
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLiked(true);
+      }
+    }
+
+    if (action === "unlike") {
+      try {
+        const unlike = await axios.delete("/api/post/like", {
+          params: {
+            postId,
+            email,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLiked(false);
+      }
+    }
+  };
+
+  return [liked, setLiked, handleLike];
+};

@@ -5,107 +5,46 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import { useEffect, useState } from "react";
-import axios from "axios";
 import { useSession } from "next-auth/react";
-import { useLikes } from "@hooks/useLike";
-import { useBookmark } from "@hooks/useBookmark";
+import { useLikes, useGetLikedValue, useHandleLike } from "@hooks/useLike";
+import {
+  useBookmark,
+  useGetBookmarkValue,
+  useHandleBookmark,
+} from "@hooks/useBookmark";
 
 export default function Post({ data }) {
-  const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
   const { data: session } = useSession();
   const postId = data.id;
+
+  const [bookmarked, setBookmarked, handleBookmark] = useHandleBookmark(
+    false,
+    data.id,
+    session?.user.email
+  );
+
+  const [liked, setLiked, handleLike] = useHandleLike(
+    false,
+    data.id,
+    session?.user.email
+  );
 
   const totalLikes = useLikes({ postId, liked });
   const totalBookmark = useBookmark({ postId, bookmarked });
 
-  const handleLike = async (action) => {
-    if (action === "like") {
-      try {
-        const like = await axios.post("/api/post/like", {
-          postId: data.id,
-          email: session?.user.email,
-        });
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLiked(true);
-      }
-    }
+  const bookmark = useGetBookmarkValue({
+    postId: data.id,
+    email: session?.user.email,
+    session,
+    setBookmarked,
+  });
 
-    if (action === "unlike") {
-      try {
-        const unlike = await axios.delete("/api/post/like", {
-          params: {
-            postId: data.id,
-            email: session?.user.email,
-          },
-        });
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLiked(false);
-      }
-    }
-  };
-
-  const handleBookmark = async (action) => {
-    if (action == "bookmark") {
-      try {
-        const bookmark = await axios.post("/api/bookmark", {
-          postId: data.id,
-          email: session?.user.email,
-        });
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setBookmarked(true);
-      }
-    }
-
-    if (action == "unbookmark") {
-      try {
-        const unbookmark = await axios.delete("/api/bookmark", {
-          params: {
-            postId: data.id,
-            email: session?.user.email,
-          },
-        });
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setBookmarked(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const checkLiked = async () => {
-      const Liked = await axios.get("/api/post/getLikedValue", {
-        params: {
-          postId: data.id,
-          email: session?.user.email,
-        },
-      });
-
-      setLiked(Liked.data.isLiked);
-    };
-
-    const checkBookmarked = async () => {
-      const bookmark = await axios.get("/api/bookmark/getBookmarkValue", {
-        params: {
-          postId: data.id,
-          email: session?.user.email,
-        },
-      });
-
-      setBookmarked(bookmark.data.isBookmarked);
-    };
-
-    checkBookmarked();
-    checkLiked();
-  }, [session]);
+  const getLiked = useGetLikedValue({
+    postId: data.id,
+    email: session?.user.email,
+    session,
+    setLiked,
+  });
 
   if (!data) {
     return (
@@ -118,7 +57,7 @@ export default function Post({ data }) {
           borderColor: "black",
         }}
       >
-        Something went wrong with this one
+        Something went wrong
       </Box>
     );
   }

@@ -3,17 +3,17 @@
 import { Typography, Box, Tabs, Tab, Avatar } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+
 import Posts from "@components/Post";
-import { usePostsByUser, useLikedPostsByUser } from "@hooks/usePosts";
-import { useBookmarkByUser } from "@hooks/useBookmark";
+import { usePostsByUser } from "@hooks/usePosts";
 import ProfilePicture from "@components/ProfilePicture";
 
-function Profile() {
+function Profile({ params, searchParams }) {
   const { data: session } = useSession();
-  const email = session?.user.email;
+  const email = params.email;
+  console.log(email);
   const allPosts = usePostsByUser({ email });
-  const likedPosts = useLikedPostsByUser({ email });
-  const bookmarkedPost = useBookmarkByUser({ email });
+  console.log(allPosts);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
   const handleTabChange = (e, tabIndex) => {
@@ -78,8 +78,6 @@ function Profile() {
       <Box>
         <Tabs value={currentTabIndex} onChange={handleTabChange} centered>
           <Tab label="Posts" />
-          <Tab label="Likes" />
-          <Tab label="Bookmark" />
         </Tabs>
       </Box>
       {/* Content Tabs */}
@@ -89,50 +87,6 @@ function Profile() {
           <Box sx={{ p: 3, maxWidth: "100%" }}>
             {allPosts.length != 0 ? (
               allPosts.map((post) => <Posts key={post.id} data={post} />)
-            ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Typography>No Posts</Typography>
-              </Box>
-            )}
-          </Box>
-        )}
-      </Box>
-
-      {/* Liked Post */}
-      <Box>
-        {/* Posts Contents */}
-        {currentTabIndex === 1 && (
-          <Box sx={{ p: 3, maxWidth: "100%" }}>
-            {likedPosts.length != 0 ? (
-              likedPosts.map((post) => <Posts key={post.id} data={post} />)
-            ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Typography>No Posts</Typography>
-              </Box>
-            )}
-          </Box>
-        )}
-      </Box>
-
-      {/* Bookmarked Post */}
-      <Box>
-        {/* Posts Contents */}
-        {currentTabIndex === 2 && (
-          <Box sx={{ p: 3, maxWidth: "100%" }}>
-            {bookmarkedPost.length != 0 ? (
-              bookmarkedPost.map((post) => <Posts key={post.id} data={post} />)
             ) : (
               <Box
                 sx={{

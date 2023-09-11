@@ -50,3 +50,53 @@ export const useBookmarkByUser = ({ email }) => {
   }, [email]);
   return bookmarkPosts;
 };
+
+export const useGetBookmarkValue = ({
+  postId,
+  email,
+  session,
+  setBookmarked,
+}) => {
+  useEffect(() => {
+    const checkBookmarked = async () => {
+      const bookmark = await axios.get("/api/bookmark/getBookmarkValue", {
+        params: {
+          postId,
+          email,
+        },
+      });
+
+      setBookmarked(bookmark.data.isBookmarked);
+    };
+
+    checkBookmarked();
+  }, [session]);
+};
+
+export const useHandleBookmark = (initialState, postId, email) => {
+  const [bookmarked, setBookmarked] = useState(initialState);
+
+  const handleBookmark = async (action) => {
+    try {
+      if (action === "bookmark") {
+        await axios.post("/api/bookmark", {
+          postId,
+          email,
+        });
+        setBookmarked(true);
+      } else if (action === "unbookmark") {
+        await axios.delete("/api/bookmark", {
+          params: {
+            postId,
+            email,
+          },
+        });
+        setBookmarked(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return [bookmarked, setBookmarked, handleBookmark];
+};
