@@ -8,6 +8,12 @@ function exclude(user, keys) {
   );
 }
 
+function generateSlug(name, id) {
+  const nameSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const idSuffix = id.substring(id.length - 3); // Ambil 3 karakter terakhir dari ID
+  return `${nameSlug}-${idSuffix}`;
+}
+
 export async function POST(request) {
   const body = await request.json();
   const { name, email, password } = body;
@@ -34,6 +40,12 @@ export async function POST(request) {
       email,
       hashedPassword,
     },
+  });
+
+  const slug = generateSlug(user.name, user.id);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { slug },
   });
 
   const userWithoutPassword = exclude(user, ["hashedPassword"]);
