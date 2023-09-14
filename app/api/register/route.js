@@ -1,17 +1,11 @@
 import bcrypt from "bcrypt";
 import prisma from "../../libs/prismadb";
 import { NextResponse } from "next/server";
-
+import { generateSlug } from "@app/libs/slug";
 function exclude(user, keys) {
   return Object.fromEntries(
     Object.entries(user).filter(([key]) => !keys.includes(key))
   );
-}
-
-function generateSlug(name, id) {
-  const nameSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  const idSuffix = id.substring(id.length - 3); // Ambil 3 karakter terakhir dari ID
-  return `${nameSlug}-${idSuffix}`;
 }
 
 export async function POST(request) {
@@ -42,7 +36,7 @@ export async function POST(request) {
     },
   });
 
-  const slug = generateSlug(user.name, user.id);
+  const slug = generateSlug(user.name);
   await prisma.user.update({
     where: { id: user.id },
     data: { slug },

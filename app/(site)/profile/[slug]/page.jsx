@@ -5,14 +5,18 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import Posts from "@components/Post";
-import { usePostsByUser } from "@hooks/usePosts";
+import { useProfilePostsByUser } from "@hooks/usePosts";
 import ProfilePicture from "@components/ProfilePicture";
+import { readSlug } from "@app/libs/slug";
 
-function Profile({ params, searchParams }) {
+function Profile({ params }) {
+  console.log(params);
   const { data: session } = useSession();
-  const email = params.email;
-  console.log(email);
-  const allPosts = usePostsByUser({ email });
+  const slug = params.slug;
+  console.log(slug);
+  const userId = readSlug(slug);
+  console.log(userId);
+  const allPosts = useProfilePostsByUser({ userId });
   console.log(allPosts);
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
@@ -85,7 +89,7 @@ function Profile({ params, searchParams }) {
         {/* Posts Contents */}
         {currentTabIndex === 0 && (
           <Box sx={{ p: 3, maxWidth: "100%" }}>
-            {allPosts.length != 0 ? (
+            {/* {allPosts.length != 0 ? (
               allPosts.map((post) => <Posts key={post.id} data={post} />)
             ) : (
               <Box
@@ -97,7 +101,7 @@ function Profile({ params, searchParams }) {
               >
                 <Typography>No Posts</Typography>
               </Box>
-            )}
+            )} */}
           </Box>
         )}
       </Box>

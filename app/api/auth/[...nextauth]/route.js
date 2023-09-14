@@ -5,9 +5,30 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@app/libs/prismadb";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
+import { generateSlug } from "@app/libs/slug";
+
+const CustomPrismaAdapter = {
+  ...PrismaAdapter(prisma),
+  async createUser(profile) {
+    const user = await prisma.user.create({
+      data: {
+        name: profile.name,
+        email: profile.email,
+        image: profile.image,
+        slug: generateSlug(profile.name),
+      },
+    });
+    return user;
+  },
+  // async updateUser(user) {
+  //   // implementasi logika pembaruan Anda di sini
+  //   return user;
+  // },
+};
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: CustomPrismaAdapter,
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       try {
