@@ -4,20 +4,21 @@ import { NextResponse } from "next/server";
 export async function GET(request) {
   const url = new URL(request.url);
   const params = url.searchParams;
-  const userId = params.get("userId");
-  console.log(userId);
+  const slug = params.get("slug");
 
-  const allPost = await prisma.post.findMany({
+  const allPost = await prisma.user.findFirst({
     where: {
-      userId: {
-        endsWith: userId,
-      },
+      slug: slug,
     },
     orderBy: {
       createdAt: "desc",
     },
     include: {
-      author: true,
+      post: {
+        include: {
+          author: true,
+        },
+      },
     },
   });
 

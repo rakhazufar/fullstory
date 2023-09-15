@@ -10,7 +10,9 @@ import ProfilePicture from "@components/ProfilePicture";
 
 function Profile() {
   const { data: session } = useSession();
+
   const email = session?.user.email;
+
   const allPosts = usePostsByUser({ email });
   const likedPosts = useLikedPostsByUser({ email });
   const bookmarkedPost = useBookmarkByUser({ email });
@@ -49,7 +51,13 @@ function Profile() {
           backgroundPosition: "center",
         }}
       >
-        <ProfilePicture />
+        {session && (
+          <ProfilePicture
+            image={session?.user.image}
+            name={session?.user.name}
+            email={session?.user.email}
+          />
+        )}
       </Box>
 
       {/* For post profile */}

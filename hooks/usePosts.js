@@ -74,21 +74,20 @@ export const useLikedPostsByUser = ({ email } = {}) => {
   return Posts;
 };
 
-export const useProfilePostsByUser = ({ userId }) => {
-  const [Posts, setPosts] = useState([]);
+export const useProfilePostsByUser = ({ slug }) => {
+  const [Posts, setPosts] = useState(null);
 
   useEffect(() => {
     const getProfilePosts = async () => {
-      if (!userId) {
+      if (!slug) {
         return;
       }
       try {
         const Posts = await axios.get("/api/profilePostsByUser", {
           params: {
-            userId,
+            slug,
           },
         });
-        console.log(Posts);
         setPosts(Posts.data);
       } catch (err) {
         console.log(err);

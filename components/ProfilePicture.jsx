@@ -50,9 +50,13 @@ const VisuallyHiddenInput = styled("input")`
   width: 1px;
 `;
 
-const ProfilePicture = () => {
+const ProfilePicture = ({ image, name, email }) => {
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
+
+  if (email !== session.user.email) {
+    return <ProfilePictureOtherPeople image={image} name={name} />;
+  }
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -99,11 +103,11 @@ const ProfilePicture = () => {
               borderRadius: "170px",
             }}
           >
-            {session?.user?.image ? (
+            {image ? (
               <Box
                 component="img"
                 alt="photo profile"
-                src={session.user.image}
+                src={image}
                 sx={{
                   height: {
                     lg: 200,
@@ -139,9 +143,7 @@ const ProfilePicture = () => {
                   backfaceVisibility: "hidden",
                 }}
               >
-                <Typography variant="h2">
-                  {session?.user.name[0].toUpperCase()}
-                </Typography>
+                <Typography variant="h2">{name[0].toUpperCase()}</Typography>
               </Avatar>
             )}
           </Box>
@@ -180,11 +182,11 @@ const ProfilePicture = () => {
       >
         <Fade in={open}>
           <Box sx={style}>
-            {session?.user?.image ? (
+            {image ? (
               <Box
                 component="img"
                 alt="photo profile"
-                src={session.user.image}
+                src={image}
                 sx={{
                   height: {
                     lg: 200 * 1.5,
@@ -218,9 +220,7 @@ const ProfilePicture = () => {
                   },
                 }}
               >
-                <Typography variant="h2">
-                  {session?.user.name[0].toUpperCase()}
-                </Typography>
+                <Typography variant="h2">{name[0].toUpperCase()}</Typography>
               </Avatar>
             )}
             <Button
@@ -249,5 +249,63 @@ const ProfilePicture = () => {
     </>
   );
 };
+
+const ProfilePictureOtherPeople = ({ name, image }) => (
+  <Box
+    sx={{
+      height: "inherit",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      mt: {
+        lg: 23,
+        xs: 22,
+      },
+    }}
+  >
+    {image ? (
+      <Box
+        component="img"
+        alt="photo profile"
+        src={image}
+        sx={{
+          height: {
+            lg: 200,
+            md: 175,
+            xs: 150,
+          },
+          width: {
+            lg: 200,
+            xs: 150,
+          },
+          borderRadius: "170px",
+          transition: ".5s ease",
+          backgroundColor: "black",
+          backfaceVisibility: "hidden",
+        }}
+      />
+    ) : (
+      <Avatar
+        sx={{
+          height: {
+            lg: 200,
+            xs: 150,
+          },
+          width: {
+            lg: 200,
+            xs: 150,
+          },
+          borderRadius: "170px",
+          transition: ".5s ease",
+          backgroundColor: "gray",
+          backfaceVisibility: "hidden",
+        }}
+      >
+        <Typography variant="h2">{name[0].toUpperCase()}</Typography>
+      </Avatar>
+    )}
+  </Box>
+);
 
 export default ProfilePicture;

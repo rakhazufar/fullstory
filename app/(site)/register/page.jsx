@@ -14,7 +14,6 @@ import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import GitHubIcon from "@mui/icons-material/GitHub";
 import GoogleIcon from "@mui/icons-material/Google";
 
 export default function SignInSide() {
@@ -22,8 +21,8 @@ export default function SignInSide() {
   const [alertMessage, setAlertMessage] = useState("");
   const [saverity, setSaverity] = useState("");
   const [data, setData] = useState({ name: "", email: "", password: "" });
-
   const router = useRouter();
+  const { push } = useRouter();
   const { data: session, status } = useSession();
 
   const handleSubmit = async (event) => {
@@ -34,9 +33,12 @@ export default function SignInSide() {
         setAlertMessage("User has been registered");
         setSaverity("success");
         setShowAlert(true);
+        setTimeout(() => {
+          push("/login");
+        }, 3000);
       })
       .catch((err) => {
-        setAlertMessage(err.response.data);
+        setAlertMessage(err?.response?.data);
         setSaverity("error");
         setShowAlert(true);
       });
@@ -137,24 +139,12 @@ export default function SignInSide() {
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
               /> */}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3 }}>
               Register
             </Button>
-            <Box sx={{ width: "100%", height: 2, backgroundColor: "gray" }} />
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={() => signIn("github")}
-              sx={{ mt: 2, mb: 2, backgroundColor: "black" }}
-              endIcon={<GitHubIcon />}
-            >
-              Github Login
-            </Button>
+            <Box
+              sx={{ width: "100%", height: 2, my: 3, backgroundColor: "gray" }}
+            />
             <Button
               fullWidth
               variant="contained"

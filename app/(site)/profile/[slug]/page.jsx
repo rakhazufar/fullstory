@@ -2,24 +2,26 @@
 
 import { Typography, Box, Tabs, Tab, Avatar } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Posts from "@components/Post";
 import { useProfilePostsByUser } from "@hooks/usePosts";
 import ProfilePicture from "@components/ProfilePicture";
-import { readSlug } from "@app/libs/slug";
 
 function Profile({ params }) {
-  console.log(params);
   const { data: session } = useSession();
+  const { push } = useRouter();
   const slug = params.slug;
-  console.log(slug);
-  const userId = readSlug(slug);
-  console.log(userId);
-  const allPosts = useProfilePostsByUser({ userId });
-  console.log(allPosts);
+  const dataUser = useProfilePostsByUser({ slug });
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
+  useEffect(() => {
+    if (dataUser?.email && session) {
+      if (dataUser?.email === session?.user.email) {
+        push("/profile");
+      }
+    }
+  }, [session, dataUser]);
   const handleTabChange = (e, tabIndex) => {
     setCurrentTabIndex(tabIndex);
   };
@@ -53,7 +55,13 @@ function Profile({ params }) {
           backgroundPosition: "center",
         }}
       >
-        <ProfilePicture />
+        {dataUser?.name && (
+          <ProfilePicture
+            image={dataUser.image}
+            name={dataUser.name}
+            email={dataUser.email}
+          />
+        )}
       </Box>
 
       {/* For post profile */}
@@ -71,10 +79,10 @@ function Profile({ params }) {
         }}
       >
         <Typography variant="h5" sx={{ fontSize: 20 }}>
-          {session?.user.name}
+          {dataUser && dataUser.name}
         </Typography>
         <Typography variant="h6" sx={{ fontSize: 14, color: "gray" }}>
-          {session?.user.email}
+          {dataUser && dataUser.email}
         </Typography>
       </Box>
 
@@ -89,8 +97,8 @@ function Profile({ params }) {
         {/* Posts Contents */}
         {currentTabIndex === 0 && (
           <Box sx={{ p: 3, maxWidth: "100%" }}>
-            {/* {allPosts.length != 0 ? (
-              allPosts.map((post) => <Posts key={post.id} data={post} />)
+            {dataUser && dataUser.post && dataUser.post.length > 0 ? (
+              dataUser.post.map((post) => <Posts key={post.id} data={post} />)
             ) : (
               <Box
                 sx={{
@@ -101,7 +109,7 @@ function Profile({ params }) {
               >
                 <Typography>No Posts</Typography>
               </Box>
-            )} */}
+            )}
           </Box>
         )}
       </Box>
