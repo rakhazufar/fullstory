@@ -5,6 +5,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useLikes, useGetLikedValue, useHandleLike } from "@hooks/useLike";
 import {
@@ -16,6 +17,7 @@ import {
 export default function Post({ data }) {
   const { data: session } = useSession();
   const postId = data.id;
+  const { push } = useRouter();
 
   const [bookmarked, setBookmarked, handleBookmark] = useHandleBookmark(
     false,
@@ -46,6 +48,10 @@ export default function Post({ data }) {
     setLiked,
   });
 
+  const handleCheckProfile = (data) => {
+    push(`/profile/${data}`);
+  };
+
   if (!data) {
     return (
       <Box
@@ -71,7 +77,15 @@ export default function Post({ data }) {
         borderColor: "black",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box
+        onClick={() => handleCheckProfile(data.author.slug)}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          cursor: "pointer",
+        }}
+      >
         <Avatar
           src={data?.author.image}
           alt={data?.author.name}

@@ -25,28 +25,41 @@ export default function SignInSide({ searchParams }) {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    signIn("credentials", { ...data, redirect: false })
-      .then((callback) => {
-        if (callback?.error) {
-          setAlertMessage(callback.error);
-          setSaverity("error");
-          setShowAlert(true);
-        }
-
-        if (callback?.ok && !callback?.error) {
-          setAlertMessage("User has been login");
-          setSaverity("success");
-          setShowAlert(true);
-          router.push("/");
-        }
-      })
-      .finally(() => {
-        setData({ email: "", password: "" });
-      });
+  const handleSuccess = () => {
+    setAlertMessage("User has been login");
+    setSaverity("success");
+    setShowAlert(true);
+    router.push("/");
   };
 
+  const handleError = (error) => {
+    setAlertMessage(error);
+    setSaverity("error");
+    setShowAlert(true);
+  };
+
+  const clearData = () => {
+    setData({ email: "", password: "" });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const callback = await signIn("credentials", {
+        ...data,
+        redirect: false,
+      });
+      if (callback?.error) {
+        handleError(callback.error);
+      } else if (callback?.ok && !callback?.error) {
+        handleSuccess();
+      }
+    } catch (error) {
+      handleError(error.message);
+    } finally {
+      clearData();
+    }
+  };
   useEffect(() => {
     const closeAlert = setTimeout(() => {
       setShowAlert(false);

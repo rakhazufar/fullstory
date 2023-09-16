@@ -14,6 +14,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { useUploadPhoto } from "@hooks/useUploadPhoto";
 
 const style = {
   position: "absolute",
@@ -53,13 +54,40 @@ const VisuallyHiddenInput = styled("input")`
 const ProfilePicture = ({ image, name, email }) => {
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
+  const [fileInput, setFileInput] = useState("");
+  const [alert, setAlert] = useState({
+    message: "",
+    show: false,
+  });
 
   if (email !== session.user.email) {
     return <ProfilePictureOtherPeople image={image} name={name} />;
   }
 
+  async function handleInputFile(e) {
+    const file = e.target.files[0];
+    console.log(file);
+    if (file.size < 1024 * 1024 && file.type.startsWith("image/")) {
+      setFileInput(file);
+    }
+  }
+
+  async function handleUpload() {
+    if (!fileInput) setAlert({ message: "No image are uploaded", show: true });
+    const formData = new FormData();
+    formData.append("file", fileInput);
+    const res = await useUploadPhoto(formData);
+  }
+
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setFileInput("");
+    setAlert({
+      message: "",
+      show: false,
+    });
+  };
   return (
     <>
       <Box
@@ -149,7 +177,7 @@ const ProfilePicture = ({ image, name, email }) => {
           </Box>
           <Typography
             sx={{
-              fontSize: 23,
+              fontSize: 17,
               fontWeight: "bold",
               color: "white",
               position: "absolute",
@@ -182,11 +210,11 @@ const ProfilePicture = ({ image, name, email }) => {
       >
         <Fade in={open}>
           <Box sx={style}>
-            {image ? (
+            {fileInput || image ? (
               <Box
                 component="img"
                 alt="photo profile"
-                src={image}
+                src={fileInput ? URL.createObjectURL(fileInput) : image}
                 sx={{
                   height: {
                     lg: 200 * 1.5,
@@ -195,10 +223,6 @@ const ProfilePicture = ({ image, name, email }) => {
                   width: {
                     lg: 200 * 1.5,
                     xs: 150,
-                  },
-                  mb: {
-                    lg: -13,
-                    xs: -9,
                   },
                   borderRadius: "170px",
                 }}
@@ -214,26 +238,37 @@ const ProfilePicture = ({ image, name, email }) => {
                     lg: 200 * 1.5,
                     xs: 150,
                   },
-                  mb: {
-                    lg: -13,
-                    xs: -9,
-                  },
                 }}
               >
                 <Typography variant="h2">{name[0].toUpperCase()}</Typography>
               </Avatar>
             )}
+            {alert.show && (
+              <Typography sx={{ color: "red" }}>{alert.message}</Typography>
+            )}
             <Button
               component="label"
-              variant="contained"
               startIcon={<CloudUploadIcon />}
-              href="#file-upload"
               sx={{
-                mt: {
-                  lg: 13,
-                  xs: 10,
+                width: {
+                  lg: 200,
+                  xs: 150,
                 },
-                mb: 2,
+              }}
+            >
+              Upload Photo
+              <VisuallyHiddenInput
+                type="file"
+                accept="image/*"
+                onChange={handleInputFile}
+              />
+            </Button>
+
+            {/* Task: use useformstatus to make pending button */}
+            <Button
+              variant="contained"
+              onClick={handleUpload}
+              sx={{
                 width: {
                   lg: 200,
                   xs: 150,
@@ -241,7 +276,6 @@ const ProfilePicture = ({ image, name, email }) => {
               }}
             >
               Change Photo
-              <VisuallyHiddenInput type="file" />
             </Button>
           </Box>
         </Fade>
