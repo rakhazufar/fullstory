@@ -15,6 +15,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useUploadPhoto } from "@hooks/useUploadPhoto";
+import { useRouter } from "next/navigation";
 
 const style = {
   position: "absolute",
@@ -55,6 +56,8 @@ const ProfilePicture = ({ image, name, email }) => {
   const [open, setOpen] = useState(false);
   const { data: session } = useSession();
   const [fileInput, setFileInput] = useState("");
+
+  const { push } = useRouter();
   const [alert, setAlert] = useState({
     message: "",
     show: false,
@@ -73,10 +76,19 @@ const ProfilePicture = ({ image, name, email }) => {
   }
 
   async function handleUpload() {
-    if (!fileInput) setAlert({ message: "No image are uploaded", show: true });
+    if (!session) {
+      setAlert({ message: "Session is not available", show: true });
+      return;
+    }
+
+    if (!fileInput) {
+      setAlert({ message: "No image are uploaded", show: true });
+      return;
+    }
     const formData = new FormData();
     formData.append("file", fileInput);
-    const res = await useUploadPhoto(formData);
+    const res = await useUploadPhoto(formData, { email: session?.user.email });
+    console.log(res);
   }
 
   const handleOpen = () => setOpen(true);
