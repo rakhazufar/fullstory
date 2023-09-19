@@ -46,7 +46,8 @@ async function savePhotoURLtoDatabase(photo, email) {
     photoURL: photo.url,
     email,
   });
-  return await res.data;
+  console.log(res);
+  return await { data: res.data, status: res.statusText };
 }
 
 export async function useUploadPhoto(formData, email) {

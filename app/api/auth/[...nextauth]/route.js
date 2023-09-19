@@ -55,6 +55,16 @@ export const authOptions = {
 
       return true;
     },
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update") {
+        return { ...token, ...session.user };
+      }
+      return { ...token, ...user };
+    },
+    async session({ token, session }) {
+      session.user = token;
+      return session;
+    },
     async redirect({ url, baseUrl }) {
       return baseUrl;
     },

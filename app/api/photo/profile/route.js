@@ -33,3 +33,35 @@ export async function PATCH(request) {
     });
   }
 }
+
+export async function GET(request) {
+  try {
+    const url = new URL(request.url);
+    const params = url.searchParams;
+
+    const email = params.get("email");
+    if (!email) {
+      return new NextResponse("email are required", {
+        status: 400,
+      });
+    }
+
+    const photoURL = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!photoURL) {
+      return NextResponse("Image Not Found", {
+        status: 404,
+      });
+    }
+    return NextResponse.json(photoURL);
+  } catch (error) {
+    console.error("Error getting photo:", error);
+    return NextResponse("Internal Server Error", {
+      status: 500,
+    });
+  }
+}

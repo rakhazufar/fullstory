@@ -12,10 +12,11 @@ import {
   ButtonBase,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useUploadPhoto } from "@hooks/useUploadPhoto";
 import { useRouter } from "next/navigation";
+import { useGetPhotoByEmail } from "@hooks/useGetPhoto";
 
 const style = {
   position: "absolute",
@@ -54,7 +55,7 @@ const VisuallyHiddenInput = styled("input")`
 
 const ProfilePicture = ({ image, name, email }) => {
   const [open, setOpen] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [fileInput, setFileInput] = useState("");
 
   const { push } = useRouter();
@@ -75,6 +76,16 @@ const ProfilePicture = ({ image, name, email }) => {
     }
   }
 
+  // useEffect(() => {
+  //   const getUserPhotoURL = async () => {
+  //     console.log(session);
+  //     if (!session) return;
+  //     const photoURL = useGetPhotoByEmail(session?.user.slug);
+  //     console.log(photoURL);
+  //   };
+  //   getUserPhotoURL();
+  // }, [session]);
+
   async function handleUpload() {
     if (!session) {
       setAlert({ message: "Session is not available", show: true });
@@ -88,7 +99,17 @@ const ProfilePicture = ({ image, name, email }) => {
     const formData = new FormData();
     formData.append("file", fileInput);
     const res = await useUploadPhoto(formData, { email: session?.user.email });
+
     console.log(res);
+    if (res.status == "OK") {
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          image: res.data.image,
+        },
+      });
+    }
   }
 
   const handleOpen = () => setOpen(true);
@@ -237,6 +258,7 @@ const ProfilePicture = ({ image, name, email }) => {
                     xs: 150,
                   },
                   borderRadius: "170px",
+                  objectFit: "cover",
                 }}
               />
             ) : (

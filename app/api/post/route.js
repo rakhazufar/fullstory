@@ -22,8 +22,6 @@ export async function POST(request) {
     return new NextResponse("Something went wrong", { status: 404 });
   }
 
-  console.log(user.id);
-
   try {
     const post = await prisma.post.create({
       data: {

@@ -11,11 +11,9 @@ import ProfilePicture from "@components/ProfilePicture";
 function Profile() {
   const { data: session } = useSession();
 
-  const email = session?.user.email;
-
-  const allPosts = usePostsByUser({ email });
-  const likedPosts = useLikedPostsByUser({ email });
-  const bookmarkedPost = useBookmarkByUser({ email });
+  const allPosts = usePostsByUser({ email: session?.user?.email });
+  const likedPosts = useLikedPostsByUser({ email: session?.user?.email });
+  const bookmarkedPost = useBookmarkByUser({ email: session?.user?.email });
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
   const handleTabChange = (e, tabIndex) => {
