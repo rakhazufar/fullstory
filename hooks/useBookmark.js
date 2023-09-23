@@ -25,7 +25,7 @@ export const useBookmark = ({ postId, bookmarked }) => {
   return bookmark;
 };
 
-export const useBookmarkByUser = ({ email }) => {
+export const useBookmarkByUser = ({ email, reloadKey }) => {
   const [bookmarkPosts, setBookmarkPosts] = useState([]);
   useEffect(() => {
     const BookmarkedPost = async () => {
@@ -47,7 +47,7 @@ export const useBookmarkByUser = ({ email }) => {
     };
 
     BookmarkedPost();
-  }, [email]);
+  }, [email, reloadKey]);
   return bookmarkPosts;
 };
 

@@ -13,6 +13,7 @@ import {
   useGetBookmarkValue,
   useHandleBookmark,
 } from "@hooks/useBookmark";
+import { useEffect } from "react";
 
 export default function Post({ data }) {
   const { data: session } = useSession();

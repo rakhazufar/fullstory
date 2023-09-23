@@ -16,7 +16,6 @@ import { useState, useEffect } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useUploadPhoto } from "@hooks/useUploadPhoto";
 import { useRouter } from "next/navigation";
-import { useGetPhotoByEmail } from "@hooks/useGetPhoto";
 
 const style = {
   position: "absolute",
@@ -57,12 +56,16 @@ const ProfilePicture = ({ image, name, email }) => {
   const [open, setOpen] = useState(false);
   const { data: session, update } = useSession();
   const [fileInput, setFileInput] = useState("");
-
+  const [isLoading, setIsLoading] = useState(false);
   const { push } = useRouter();
   const [alert, setAlert] = useState({
     message: "",
     show: false,
   });
+
+  useEffect(() => {
+    setOpen(false);
+  }, [session]);
 
   if (email !== session.user.email) {
     return <ProfilePictureOtherPeople image={image} name={name} />;
@@ -75,18 +78,8 @@ const ProfilePicture = ({ image, name, email }) => {
       setFileInput(file);
     }
   }
-
-  // useEffect(() => {
-  //   const getUserPhotoURL = async () => {
-  //     console.log(session);
-  //     if (!session) return;
-  //     const photoURL = useGetPhotoByEmail(session?.user.slug);
-  //     console.log(photoURL);
-  //   };
-  //   getUserPhotoURL();
-  // }, [session]);
-
   async function handleUpload() {
+    setIsLoading(true);
     if (!session) {
       setAlert({ message: "Session is not available", show: true });
       return;
@@ -98,9 +91,12 @@ const ProfilePicture = ({ image, name, email }) => {
     }
     const formData = new FormData();
     formData.append("file", fileInput);
-    const res = await useUploadPhoto(formData, { email: session?.user.email });
+    const res = await useUploadPhoto(
+      formData,
+      { email: session?.user.email },
+      { imageURL: session?.user.image }
+    );
 
-    console.log(res);
     if (res.status == "OK") {
       await update({
         ...session,
@@ -110,6 +106,7 @@ const ProfilePicture = ({ image, name, email }) => {
         },
       });
     }
+    setIsLoading(false);
   }
 
   const handleOpen = () => setOpen(true);
@@ -302,6 +299,7 @@ const ProfilePicture = ({ image, name, email }) => {
             <Button
               variant="contained"
               onClick={handleUpload}
+              disabled={isLoading}
               sx={{
                 width: {
                   lg: 200,
@@ -309,7 +307,7 @@ const ProfilePicture = ({ image, name, email }) => {
                 },
               }}
             >
-              Change Photo
+              {isLoading ? "Loading..." : "Change Photo"}
             </Button>
           </Box>
         </Fade>

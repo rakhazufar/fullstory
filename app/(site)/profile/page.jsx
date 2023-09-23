@@ -2,7 +2,7 @@
 
 import { Typography, Box, Tabs, Tab, Avatar } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Posts from "@components/Post";
 import { usePostsByUser, useLikedPostsByUser } from "@hooks/usePosts";
 import { useBookmarkByUser } from "@hooks/useBookmark";
@@ -10,10 +10,20 @@ import ProfilePicture from "@components/ProfilePicture";
 
 function Profile() {
   const { data: session } = useSession();
+  const [reloadKey, setReloadKey] = useState(false);
+  useEffect(() => {
+    setReloadKey((prev) => !prev);
+  }, [session]);
 
-  const allPosts = usePostsByUser({ email: session?.user?.email });
-  const likedPosts = useLikedPostsByUser({ email: session?.user?.email });
-  const bookmarkedPost = useBookmarkByUser({ email: session?.user?.email });
+  const allPosts = usePostsByUser({ email: session?.user?.email, reloadKey });
+  const likedPosts = useLikedPostsByUser({
+    email: session?.user?.email,
+    reloadKey,
+  });
+  const bookmarkedPost = useBookmarkByUser({
+    email: session?.user?.email,
+    reloadKey,
+  });
   const [currentTabIndex, setCurrentTabIndex] = useState(0);
 
   const handleTabChange = (e, tabIndex) => {

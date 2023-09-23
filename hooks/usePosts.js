@@ -23,7 +23,7 @@ export const usePosts = ({ updateTimeline = "" } = {}) => {
   return Posts;
 };
 
-export const usePostsByUser = ({ email } = {}) => {
+export const usePostsByUser = ({ email, reloadKey } = {}) => {
   const [Posts, setPosts] = useState([]);
 
   useEffect(() => {
@@ -44,12 +44,12 @@ export const usePostsByUser = ({ email } = {}) => {
     };
 
     getPosts();
-  }, [email]);
+  }, [email, reloadKey]);
 
   return Posts;
 };
 
-export const useLikedPostsByUser = ({ email } = {}) => {
+export const useLikedPostsByUser = ({ email, reloadKey } = {}) => {
   const [Posts, setPosts] = useState([]);
   useEffect(() => {
     const getPosts = async () => {
@@ -69,7 +69,7 @@ export const useLikedPostsByUser = ({ email } = {}) => {
     };
 
     getPosts();
-  }, [email]);
+  }, [email, reloadKey]);
 
   return Posts;
 };
