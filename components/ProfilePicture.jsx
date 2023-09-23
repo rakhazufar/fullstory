@@ -82,11 +82,13 @@ const ProfilePicture = ({ image, name, email }) => {
     setIsLoading(true);
     if (!session) {
       setAlert({ message: "Session is not available", show: true });
+      setIsLoading(false);
       return;
     }
 
     if (!fileInput) {
       setAlert({ message: "No image are uploaded", show: true });
+      setIsLoading(false);
       return;
     }
     const formData = new FormData();
