@@ -9,13 +9,11 @@ import {
   Button,
   Backdrop,
   styled,
-  ButtonBase,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useUploadPhoto } from "@hooks/useUploadPhoto";
-import { useRouter } from "next/navigation";
 
 const style = {
   position: "absolute",
@@ -57,7 +55,7 @@ const ProfilePicture = ({ image, name, email }) => {
   const { data: session, update } = useSession();
   const [fileInput, setFileInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { push } = useRouter();
+  console.log(session);
   const [alert, setAlert] = useState({
     message: "",
     show: false,
