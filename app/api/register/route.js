@@ -9,6 +9,25 @@ function exclude(user, keys) {
   );
 }
 
+const createUser = async (name, email, password) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email,
+      hashedPassword,
+    },
+  });
+
+  const slug = generateSlug(user.name);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { slug },
+  });
+
+  return user;
+};
+
 export async function POST(request) {
   const body = await request.json();
   const { name, email, password } = body;
@@ -27,31 +46,17 @@ export async function POST(request) {
     return new NextResponse("User already exist", { status: 409 });
   }
 
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = await createUser(name, email, password);
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        hashedPassword,
-      },
-    });
-
-    const slug = generateSlug(user.name);
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { slug },
-    });
-
+  if (newUser) {
     await sendEmail(
       "Ini email test",
-      user.email,
+      newUser.email,
       "tesstttt assalamualaikum pakettt!"
     );
+  }
 
-    const userWithoutPassword = exclude(user, ["hashedPassword"]);
+  const userWithoutPassword = exclude(newUser, ["hashedPassword"]);
 
-    return NextResponse.json(userWithoutPassword);
-  } catch (err) {}
+  return NextResponse.json(userWithoutPassword);
 }
