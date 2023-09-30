@@ -21,6 +21,7 @@
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "cloudinary": "^1.37.3",
+    "crypto": "^1.0.1",
     "encoding": "^0.1.13",
     "google-auth-library": "^9.0.0",
     "googleapis": "^126.0.1",

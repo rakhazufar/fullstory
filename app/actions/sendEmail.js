@@ -11,13 +11,13 @@ const transport = nodemailer.createTransport({
   },
 });
 
-export default async function sendEmail(subject, email, message) {
+export default async function sendEmail(subject, email, message, token) {
   const mailOptions = {
-    from: process.env.SMTP_MAIL,
+    from: `Fullstory <${process.env.SMTP_MAIL}>`,
     to: email,
     subject: subject,
     text: message,
-    html: `<h1>${message}</h1>`,
+    html: `<h4>${message}</h4> <a href='${process.env.NEXT_PUBLIC_BASE_URL}/activate/${token.token}'>Aktivasi Di Sini</a>`,
   };
 
   return new Promise((resolve, reject) => {

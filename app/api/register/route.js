@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import prisma from "../../libs/prismadb";
 import { NextResponse } from "next/server";
 import { generateSlug } from "@app/libs/slug";
+import { randomUUID } from "crypto";
 import sendEmail from "@app/actions/sendEmail";
 function exclude(user, keys) {
   return Object.fromEntries(
@@ -28,6 +29,16 @@ const createUser = async (name, email, password) => {
   return user;
 };
 
+const createActivateToken = async (userId) => {
+  const token = await prisma.activateToken.create({
+    data: {
+      token: `${randomUUID()}${randomUUID()}`.replace(/-/g, ""),
+      userId,
+    },
+  });
+
+  return token;
+};
 export async function POST(request) {
   const body = await request.json();
   const { name, email, password } = body;
@@ -49,10 +60,13 @@ export async function POST(request) {
   const newUser = await createUser(name, email, password);
 
   if (newUser) {
+    const token = await createActivateToken(newUser.id);
+    console.log(token);
     await sendEmail(
-      "Ini email test",
+      "Fullstory Email Activation",
       newUser.email,
-      "tesstttt assalamualaikum pakettt!"
+      `hallo selamat datang di fullstory, saya tau kamu tidak sabar untuk membagikan seluruh kisah kamu. tapi kamu harus aktivasi email kamu dulu!`,
+      token
     );
   }
 
