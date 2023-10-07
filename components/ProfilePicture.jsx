@@ -55,7 +55,6 @@ const ProfilePicture = ({ image, name, email }) => {
   const { data: session, update } = useSession();
   const [fileInput, setFileInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  console.log(session);
   const [alert, setAlert] = useState({
     message: "",
     show: false,
@@ -71,7 +70,6 @@ const ProfilePicture = ({ image, name, email }) => {
 
   async function handleInputFile(e) {
     const file = e.target.files[0];
-    console.log(file);
     if (file.size < 1024 * 1024 && file.type.startsWith("image/")) {
       setFileInput(file);
     }
@@ -128,8 +126,8 @@ const ProfilePicture = ({ image, name, email }) => {
           justifyContent: "flex-end",
           alignItems: "center",
           mt: {
-            lg: 23,
-            xs: 22,
+            lg: "15vh",
+            xs: "18vh",
           },
         }}
       >
@@ -188,6 +186,7 @@ const ProfilePicture = ({ image, name, email }) => {
                 sx={{
                   height: {
                     lg: 200,
+                    md: 175,
                     xs: 150,
                   },
                   cursor: "pointer",

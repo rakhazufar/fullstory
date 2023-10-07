@@ -1,8 +1,9 @@
 "use client";
 
-import { Typography, Box, Tabs, Tab, Avatar } from "@mui/material";
+import { Typography, Box, Tabs, Tab, Button } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Posts from "@components/Post";
 import { usePostsByUser, useLikedPostsByUser } from "@hooks/usePosts";
 import { useBookmarkByUser } from "@hooks/useBookmark";
@@ -88,6 +89,23 @@ function Profile() {
         <Typography variant="h6" sx={{ fontSize: 14, color: "gray" }}>
           {session?.user.email}
         </Typography>
+        {session?.user.emailVerified ? (
+          ""
+        ) : (
+          <>
+            <Typography variant="h6" sx={{ fontSize: 13, color: "red" }}>
+              Not Verified, Check Your Inbox to Verify.
+            </Typography>
+            <Button
+              component={Link}
+              href="/email-verify"
+              variant="outlined"
+              size="small"
+            >
+              Haven't Received Verification Email?
+            </Button>
+          </>
+        )}
       </Box>
 
       {/* Tabs, pakai MUI tabs */}
