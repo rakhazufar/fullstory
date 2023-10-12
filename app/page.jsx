@@ -46,7 +46,19 @@ export default function Home() {
           />
           <CreatePost setUpdateTimeline={setUpdateTimeline} />
           {allPosts ? (
-            allPosts.map((post) => <Posts key={post.id} data={post} />)
+            allPosts.map((post) => (
+              <div key={post.id}>
+                <Posts data={post} />
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "1px",
+                    backgroundColor: "gray",
+                    opacity: 0.7,
+                  }}
+                ></Box>
+              </div>
+            ))
           ) : (
             <Typography>Oh No, there is nothing in here</Typography>
           )}

@@ -78,8 +78,8 @@ export default function SignInSide({ searchParams }) {
   }, [status]);
 
   useEffect(() => {
-    if (searchParams?.method === "user_already_registered") {
-      setAlertMessage("User Already Registeed with Other Method");
+    if (searchParams?.error) {
+      setAlertMessage(searchParams?.error);
       setSaverity("error");
       setShowAlert(true);
     }

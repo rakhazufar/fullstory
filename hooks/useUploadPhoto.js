@@ -41,6 +41,7 @@ async function uploadPhotoToCloudinary(newFile) {
 }
 
 function getPublicID(imageURL) {
+  console.log(imageURL);
   const splitUrl = imageURL.split("/");
   const publicIdWithExtension = `${splitUrl[splitUrl.length - 2]}/${
     splitUrl[splitUrl.length - 1]
@@ -50,6 +51,7 @@ function getPublicID(imageURL) {
 }
 
 async function deletePhotoFromCloudinary({ imageURL }) {
+  console.log(imageURL);
   const publicID = getPublicID(imageURL);
   try {
     const result = await cloudinary.v2.uploader.destroy(publicID);
@@ -76,7 +78,10 @@ export async function useUploadPhoto(formData, email, imageURL) {
     fs.unlink(newFile.filepath);
 
     const file = await savePhotoURLtoDatabase(photo, email.email);
-    await deletePhotoFromCloudinary(imageURL);
+
+    if (imageURL.imageURL !== null) {
+      await deletePhotoFromCloudinary(imageURL);
+    }
 
     return file;
   } catch (error) {

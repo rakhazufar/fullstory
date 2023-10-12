@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { readSlug } from "@app/libs/slug";
+import { readSlug } from "@libs/slug";
 
 export const usePosts = ({ updateTimeline = "" } = {}) => {
   const [Posts, setPosts] = useState([]);

@@ -1,23 +1,29 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@app/libs/prismadb";
+import prisma from "@libs/prismadb";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcrypt";
-import { generateSlug } from "@app/libs/slug";
+import { generateSlug } from "@libs/slug";
 
 const CustomPrismaAdapter = {
   ...PrismaAdapter(prisma),
   async createUser(profile) {
-    const user = await prisma.user.create({
-      data: {
-        name: profile.name,
-        email: profile.email,
-        image: profile.image,
-        slug: generateSlug(profile.name),
-      },
-    });
-    return user;
+    try {
+      const user = await prisma.user.create({
+        data: {
+          name: profile.name,
+          email: profile.email,
+          image: profile.image,
+          slug: generateSlug(profile.name),
+          emailVerified: new Date(),
+        },
+      });
+      return user;
+    } catch (error) {
+      console.log("error prisma adapter", error.message);
+      throw new Error("Failed to create user.");
+    }
   },
   // async updateUser(user) {
   //   // implementasi logika pembaruan Anda di sini
@@ -36,6 +42,12 @@ export const authOptions = {
           },
         });
 
+        if (!existingUser) {
+          throw new Error(
+            "User not found or already registered with another method.or already lo"
+          );
+        }
+
         const oauthAccount = await prisma.account.findFirst({
           where: {
             userId: existingUser.id,
@@ -43,14 +55,15 @@ export const authOptions = {
         });
 
         if (oauthAccount && account.provider === "credentials") {
-          return "http://localhost:3000/login?method=user_already_registered";
+          throw new Error("User already registered with another method.");
         }
 
         if (account.type === "oauth" && !oauthAccount) {
-          return "http://localhost:3000/login?method=user_already_registered";
+          throw new Error("User already registered with another method.");
         }
       } catch (error) {
         console.log("error:", error.message);
+        return `/login?error=${encodeURIComponent(error.message)}`;
       }
 
       return true;
@@ -87,31 +100,44 @@ export const authOptions = {
       },
       async authorize(credentials) {
         //check if user provide an email and password
-        if (!credentials.email || !credentials.password) {
-          throw new Error("Missing Fields");
+        try {
+          if (!credentials.email || !credentials.password) {
+            throw new Error("Missing Fields");
+          }
+
+          //check if user exist
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
+
+          if (!user) {
+            throw new Error("User Not Found");
+          }
+
+          if (!user?.hashedPassword) {
+            throw new Error("User Already Login with Another Method");
+          }
+
+          const passwordMatch = await bcrypt.compare(
+            credentials.password,
+            user.hashedPassword
+          );
+
+          if (!passwordMatch) {
+            throw new Error("Incorrect Password");
+          }
+
+          if (!user.emailVerified) {
+            throw new Error("Please verify your email before signing in.");
+          }
+
+          return user;
+        } catch (error) {
+          console.error("Authorize Error:", error.message);
+          throw new Error(error.message);
         }
-
-        //check if user exist
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
-
-        if (!user || !user?.hashedPassword) {
-          throw new Error("User Not Found");
-        }
-
-        const passwordMatch = await bcrypt.compare(
-          credentials.password,
-          user.hashedPassword
-        );
-
-        if (!passwordMatch) {
-          throw new Error("Incorrect Password");
-        }
-
-        return user;
       },
     }),
   ],

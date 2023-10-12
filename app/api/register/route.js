@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
-import prisma from "../../libs/prismadb";
+import prisma from "../../../libs/prismadb";
 import { NextResponse } from "next/server";
-import { generateSlug } from "@app/libs/slug";
+import { generateSlug } from "@libs/slug";
 import { randomUUID } from "crypto";
 import sendEmail from "@app/actions/sendEmail";
 function exclude(user, keys) {
@@ -39,6 +39,7 @@ const createActivateToken = async (userId) => {
 
   return token;
 };
+
 export async function POST(request) {
   const body = await request.json();
   const { name, email, password } = body;

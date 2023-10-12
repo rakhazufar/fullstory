@@ -78,8 +78,9 @@ function Profile() {
           alignItems: "center",
           padding: 2,
           marginTop: {
-            lg: 13,
-            xs: 8,
+            xl: 6,
+            lg: 7,
+            xs: 4,
           },
         }}
       >

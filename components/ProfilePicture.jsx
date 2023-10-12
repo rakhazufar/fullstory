@@ -27,15 +27,7 @@ const style = {
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
-  height: {
-    lg: "40%",
-    xs: "30%",
-  },
-  width: {
-    lg: "35%",
-    xs: "50%",
-  },
-  p: 2,
+  p: 6,
 };
 
 const VisuallyHiddenInput = styled("input")`
@@ -72,7 +64,12 @@ const ProfilePicture = ({ image, name, email }) => {
     const file = e.target.files[0];
     if (file.size < 1024 * 1024 && file.type.startsWith("image/")) {
       setFileInput(file);
+      setAlert({ message: "", show: false });
+    } else {
+      setAlert({ message: "File too large", show: true });
+      setIsLoading(false);
     }
+    console.log(file, fileInput);
   }
   async function handleUpload() {
     setIsLoading(true);

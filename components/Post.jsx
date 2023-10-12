@@ -1,10 +1,12 @@
 "use client";
 
 import { Typography, Box, Avatar } from "@mui/material";
+import getTimeDifference from "@utils/getTimeDifference";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useLikes, useGetLikedValue, useHandleLike } from "@hooks/useLike";
@@ -13,12 +15,13 @@ import {
   useGetBookmarkValue,
   useHandleBookmark,
 } from "@hooks/useBookmark";
-import { useEffect } from "react";
 
 export default function Post({ data }) {
   const { data: session } = useSession();
   const postId = data.id;
   const { push } = useRouter();
+  const createdAt = data.createdAt;
+  const timeDifference = getTimeDifference(createdAt);
 
   const [bookmarked, setBookmarked, handleBookmark] = useHandleBookmark(
     false,
@@ -35,14 +38,14 @@ export default function Post({ data }) {
   const totalLikes = useLikes({ postId, liked });
   const totalBookmark = useBookmark({ postId, bookmarked });
 
-  const bookmark = useGetBookmarkValue({
+  useGetBookmarkValue({
     postId: data.id,
     email: session?.user.email,
     session,
     setBookmarked,
   });
 
-  const getLiked = useGetLikedValue({
+  useGetLikedValue({
     postId: data.id,
     email: session?.user.email,
     session,
@@ -83,6 +86,7 @@ export default function Post({ data }) {
         sx={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "flex-start",
           gap: 1,
           cursor: "pointer",
         }}
@@ -92,12 +96,63 @@ export default function Post({ data }) {
           alt={data?.author.name}
           sx={{ width: 40, height: 40 }}
         />
-        <Typography sx={{ fontWeight: "700" }}>{data?.author.name}</Typography>
+        <Box>
+          <Typography sx={{ fontWeight: "700" }}>
+            {data?.author.name}
+          </Typography>
+          <Typography sx={{ fontWeight: "400", fontSize: 12, color: "gray" }}>
+            {data?.author.email}
+          </Typography>
+        </Box>
+        <Typography
+          sx={{
+            fontWeight: "400",
+            fontSize: 16,
+            color: "gray",
+            paddingBottom: 3,
+          }}
+        >
+          <span
+            style={{
+              color: "darkgray",
+              fontSize: 25,
+              fontWeight: "900",
+            }}
+          >
+            ·
+          </span>{" "}
+          {timeDifference}
+        </Typography>
       </Box>
-      <Typography style={{ whiteSpace: "pre-line" }}>
-        {data?.content}
-      </Typography>
-      <Box sx={{ display: "flex", gap: 3 }}>
+      <Box
+        style={{ maxWidth: "100%", cursor: "pointer" }}
+        onClick={() => {
+          push(`/postDetail/${postId}`);
+        }}
+      >
+        <Typography
+          style={{
+            whiteSpace: "pre-line",
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+          }}
+        >
+          {data?.content}
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 12 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <ChatBubbleOutlineIcon
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                handleLike("like");
+              }}
+            />
+            <Typography>{totalLikes}</Typography>
+          </Box>
+        </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {liked ? (

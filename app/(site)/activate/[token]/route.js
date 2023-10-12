@@ -1,9 +1,8 @@
-import prisma from "@app/libs/prismadb";
+import prisma from "@libs/prismadb";
 import { redirect } from "next/navigation";
 
 export async function GET(request, { params }) {
   const { token } = params;
-
   const user = await prisma.user.findFirst({
     where: {
       activateToken: {
@@ -25,8 +24,6 @@ export async function GET(request, { params }) {
       },
     },
   });
-
-  console.log(user);
 
   if (!user) {
     throw new Error("Invalid Token");
