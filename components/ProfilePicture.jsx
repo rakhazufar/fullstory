@@ -123,8 +123,10 @@ const ProfilePicture = ({ image, name, email }) => {
           justifyContent: "flex-end",
           alignItems: "center",
           mt: {
+            xl: "14vh",
             lg: "15vh",
-            xs: "18vh",
+            sm: "16vh",
+            xs: "17vh",
           },
         }}
       >

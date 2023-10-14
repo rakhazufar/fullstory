@@ -1,12 +1,44 @@
 "use client";
 
-import { Typography, Box, Avatar, Tabs, Tab, Button } from "@mui/material";
+import { Typography, Box, Avatar } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import getTimeDifference from "@utils/getTimeDifference";
+import { useSession } from "next-auth/react";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import { useLikes, useGetLikedValue, useHandleLike } from "@hooks/useLike";
+import { CreatePostMobile } from "@components/CreatePost";
+import { useCreateComment } from "@hooks/useComment";
+import Comments from "@components/Comments";
+import {
+  useBookmark,
+  useGetBookmarkValue,
+  useHandleBookmark,
+} from "@hooks/useBookmark";
 
 function PostDetail({ params }) {
   const [postDetail, setPostDetail] = useState({});
+  const [timeDifference, setTimeDifference] = useState("");
   const postId = params.id;
+  const [open, setOpen] = useState(false);
+  const [update, setUpdate] = useState(false);
+  const { push } = useRouter();
+  const { data: session } = useSession();
+  const createComment = useCreateComment();
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   useEffect(() => {
     const getPostDetail = async () => {
       try {
@@ -15,6 +47,8 @@ function PostDetail({ params }) {
             postId,
           },
         });
+        // const time = getTimeDifference(data.data.createdAt);
+        // setTimeDifference(time);
         setPostDetail(data.data);
       } catch (err) {
         console.error(err);
@@ -24,7 +58,49 @@ function PostDetail({ params }) {
 
     getPostDetail();
   }, []);
-  console.log(postDetail);
+
+  const handleUpdate = () => {
+    setUpdate((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (Object.keys(postDetail).length != 0) {
+      const data = getTimeDifference(postDetail.createdAt);
+      setTimeDifference(data);
+    }
+  }, [postDetail]);
+
+  const [liked, setLiked, handleLike] = useHandleLike(
+    false,
+    postId,
+    session?.user.email
+  );
+  const totalLikes = useLikes({ postId, liked });
+
+  useGetLikedValue({
+    postId,
+    email: session?.user.email,
+    session,
+    setLiked,
+  });
+
+  const [bookmarked, setBookmarked, handleBookmark] = useHandleBookmark(
+    false,
+    postId,
+    session?.user.email
+  );
+
+  const totalBookmark = useBookmark({ postId, bookmarked });
+  useGetBookmarkValue({
+    postId,
+    email: session?.user.email,
+    session,
+    setBookmarked,
+  });
+
+  const handleCheckProfile = (data) => {
+    push(`/profile/${data}`);
+  };
 
   return (
     <Box
@@ -33,9 +109,19 @@ function PostDetail({ params }) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        width: "100%",
+        justifyContent: "flex-start",
+        width: {
+          xl: "50%",
+          lg: "60%",
+          xs: "90%",
+        },
         minHeight: "100vh",
-        paddingTop: "15%",
+        paddingTop: {
+          xl: "2%",
+          lg: "5%",
+          sm: "8%",
+          xs: "15%",
+        },
       }}
     >
       {Object.keys(postDetail).length != 0 ? (
@@ -46,14 +132,26 @@ function PostDetail({ params }) {
             padding: 2,
             gap: 1,
             borderColor: "black",
+            width: "100%",
           }}
         >
+          <CreatePostMobile
+            open={open}
+            handleClose={handleClose}
+            textButton="Reply"
+            replyingTo={postDetail?.author.name}
+            handleSubmit={createComment}
+            update={handleUpdate}
+            postId={postId}
+          />
           <Box
+            onClick={() => handleCheckProfile(postDetail?.author.slug)}
             sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-start",
               gap: 1,
+              cursor: "pointer",
             }}
           >
             <Avatar
@@ -71,25 +169,25 @@ function PostDetail({ params }) {
                 {postDetail?.author.email}
               </Typography>
             </Box>
-            {/* <Typography
-            sx={{
-              fontWeight: "400",
-              fontSize: 16,
-              color: "gray",
-              paddingBottom: 3,
-            }}
-          >
-            <span
-              style={{
-                color: "darkgray",
-                fontSize: 25,
-                fontWeight: "900",
+            <Typography
+              sx={{
+                fontWeight: "400",
+                fontSize: 16,
+                color: "gray",
+                paddingBottom: 2.5,
               }}
             >
-              ·
-            </span>{" "}
-            {timeDifference}
-          </Typography> */}
+              <span
+                style={{
+                  color: "darkgray",
+                  fontSize: 25,
+                  fontWeight: "900",
+                }}
+              >
+                ·
+              </span>{" "}
+              {timeDifference}
+            </Typography>
           </Box>
           <Box style={{ maxWidth: "100%" }}>
             <Typography
@@ -102,60 +200,78 @@ function PostDetail({ params }) {
               {postDetail?.content}
             </Typography>
           </Box>
-
-          {/* <Box sx={{ display: "flex", gap: 12 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              width: "100%",
+              height: "1px",
+              backgroundColor: "gray",
+              opacity: 0.7,
+            }}
+          ></Box>
+          <Box sx={{ display: "flex", justifyContent: "space-evenly", py: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <ChatBubbleOutlineIcon
-                style={{ cursor: "pointer" }}
-                onClick={() => {
-                  handleLike("like");
-                }}
-              />
-              <Typography>{totalLikes}</Typography>
-            </Box>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {liked ? (
-                <FavoriteIcon
-                  style={{ color: "red", cursor: "pointer" }}
-                  onClick={() => {
-                    handleLike("unlike");
-                  }}
-                />
-              ) : (
-                <FavoriteBorderIcon
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <ChatBubbleOutlineIcon
                   style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    handleLike("like");
-                  }}
+                  onClick={handleClickOpen}
                 />
-              )}
-              <Typography>{totalLikes}</Typography>
+                <Typography>{totalLikes}</Typography>
+              </Box>
             </Box>
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {bookmarked ? (
-                <BookmarkIcon
-                  style={{ color: "orange", cursor: "pointer" }}
-                  onClick={() => {
-                    handleBookmark("unbookmark");
-                  }}
-                />
-              ) : (
-                <BookmarkBorderIcon
-                  style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    handleBookmark("bookmark");
-                  }}
-                />
-              )}
-              <Typography>{totalBookmark}</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {liked ? (
+                  <FavoriteIcon
+                    style={{ color: "red", cursor: "pointer" }}
+                    onClick={() => {
+                      handleLike("unlike");
+                    }}
+                  />
+                ) : (
+                  <FavoriteBorderIcon
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      handleLike("like");
+                    }}
+                  />
+                )}
+                <Typography>{totalLikes}</Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {bookmarked ? (
+                  <BookmarkIcon
+                    style={{ color: "orange", cursor: "pointer" }}
+                    onClick={() => {
+                      handleBookmark("unbookmark");
+                    }}
+                  />
+                ) : (
+                  <BookmarkBorderIcon
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      handleBookmark("bookmark");
+                    }}
+                  />
+                )}
+                <Typography>{totalBookmark}</Typography>
+              </Box>
             </Box>
           </Box>
-        </Box> */}
+          <Box
+            sx={{
+              width: "100%",
+              height: "1px",
+              backgroundColor: "gray",
+              opacity: 0.7,
+            }}
+          ></Box>
+          <Comments
+            postId={postId}
+            update={update}
+            postAuthor={postDetail?.author.name}
+          />
         </Box>
       ) : (
         <Typography>Loading...</Typography>

@@ -1,62 +1,10 @@
-"use client";
-
 import { Typography, Box, Avatar } from "@mui/material";
 import getTimeDifference from "@utils/getTimeDifference";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useLikes, useGetLikedValue, useHandleLike } from "@hooks/useLike";
-import {
-  useBookmark,
-  useGetBookmarkValue,
-  useHandleBookmark,
-} from "@hooks/useBookmark";
 
-export default function Post({ data }) {
-  const { data: session } = useSession();
-  const postId = data.id;
-  const { push } = useRouter();
-  const createdAt = data.createdAt;
-  const timeDifference = getTimeDifference(createdAt);
+export default function Comment({ commentData, postAuthor }) {
+  const timeDifference = getTimeDifference(commentData.createdAt);
 
-  const [bookmarked, setBookmarked, handleBookmark] = useHandleBookmark(
-    false,
-    data.id,
-    session?.user.email
-  );
-
-  const [liked, setLiked, handleLike] = useHandleLike(
-    false,
-    data.id,
-    session?.user.email
-  );
-
-  const totalLikes = useLikes({ postId, liked });
-  const totalBookmark = useBookmark({ postId, bookmarked });
-
-  useGetBookmarkValue({
-    postId: data.id,
-    email: session?.user.email,
-    session,
-    setBookmarked,
-  });
-
-  useGetLikedValue({
-    postId: data.id,
-    email: session?.user.email,
-    session,
-    setLiked,
-  });
-
-  const handleCheckProfile = (data) => {
-    push(`/profile/${data}`);
-  };
-
-  if (!data) {
+  if (!commentData) {
     return (
       <Box
         sx={{
@@ -67,23 +15,22 @@ export default function Post({ data }) {
           borderColor: "black",
         }}
       >
-        Something went wrong
+        Ups, something went wrong
       </Box>
     );
   }
+
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        padding: 2,
-        px: 3,
+        padding: 1,
         gap: 1,
         borderColor: "black",
       }}
     >
       <Box
-        onClick={() => handleCheckProfile(data.author.slug)}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -93,22 +40,22 @@ export default function Post({ data }) {
         }}
       >
         <Avatar
-          src={data?.author.image}
-          alt={data?.author.name}
+          src={commentData.user.image}
+          alt={commentData.user.name}
           sx={{ width: 40, height: 40 }}
         />
         <Box>
           <Typography sx={{ fontWeight: "700" }}>
-            {data?.author.name}
+            {commentData.user.name}
           </Typography>
           <Typography sx={{ fontWeight: "400", fontSize: 12, color: "gray" }}>
-            {data?.author.email}
+            Replying to {postAuthor}
           </Typography>
         </Box>
         <Typography
           sx={{
             fontWeight: "400",
-            fontSize: 16,
+            fontSize: 13,
             color: "gray",
             paddingBottom: 3,
           }}
@@ -125,12 +72,7 @@ export default function Post({ data }) {
           {timeDifference}
         </Typography>
       </Box>
-      <Box
-        style={{ maxWidth: "100%", cursor: "pointer" }}
-        onClick={() => {
-          push(`/postDetail/${postId}`);
-        }}
-      >
+      <Box style={{ maxWidth: "100%", cursor: "pointer" }}>
         <Typography
           style={{
             whiteSpace: "pre-line",
@@ -138,17 +80,11 @@ export default function Post({ data }) {
             wordBreak: "break-word",
           }}
         >
-          {data?.content}
+          {commentData.content}
         </Typography>
       </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-around",
-          paddingTop: 0.5,
-        }}
-      >
+      {/* <Box sx={{ display: "flex", justifyContent: "space-around" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <ChatBubbleOutlineIcon
@@ -200,7 +136,7 @@ export default function Post({ data }) {
             <Typography>{totalBookmark}</Typography>
           </Box>
         </Box>
-      </Box>
+      </Box> */}
     </Box>
   );
 }

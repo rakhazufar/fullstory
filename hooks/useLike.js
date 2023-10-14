@@ -17,7 +17,8 @@ export const useLikes = ({ postId, liked }) => {
 
         setTotalLike(postLike.data);
       } catch (err) {
-        return err;
+        console.log(err);
+        throw new Error(err.message);
       }
     };
 
@@ -29,18 +30,23 @@ export const useLikes = ({ postId, liked }) => {
 
 export const useGetLikedValue = ({ postId, email, session, setLiked }) => {
   useEffect(() => {
-    const checkLiked = async () => {
-      const Liked = await axios.get("/api/post/getLikedValue", {
-        params: {
-          postId,
-          email,
-        },
-      });
+    try {
+      const checkLiked = async () => {
+        const Liked = await axios.get("/api/post/getLikedValue", {
+          params: {
+            postId,
+            email,
+          },
+        });
 
-      setLiked(Liked.data.isLiked);
-    };
+        setLiked(Liked.data.isLiked);
+      };
 
-    checkLiked();
+      checkLiked();
+    } catch (err) {
+      console.log(err);
+      throw new Error(err.message);
+    }
   }, [session]);
 };
 
@@ -56,6 +62,7 @@ export const useHandleLike = (initialState, postId, email) => {
         });
       } catch (err) {
         console.log(err);
+        throw new Error(err.message);
       } finally {
         setLiked(true);
       }
@@ -71,6 +78,7 @@ export const useHandleLike = (initialState, postId, email) => {
         });
       } catch (err) {
         console.log(err);
+        throw new Error(err.message);
       } finally {
         setLiked(false);
       }

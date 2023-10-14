@@ -29,6 +29,7 @@ export async function POST(request) {
         userId: user.id,
       },
     });
+    console.log("postingan", post);
 
     return new NextResponse("Success to post story", { status: 201 });
   } catch (err) {

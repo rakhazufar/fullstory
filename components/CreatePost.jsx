@@ -1,6 +1,13 @@
 "use client";
 
-import { Box, TextField, Typography, Button, Alert } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  Alert,
+  responsiveFontSizes,
+} from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, forwardRef } from "react";
 import { useRouter } from "next/navigation";
@@ -13,41 +20,30 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Slide from "@mui/material/Slide";
 
-const handleSubmit = async (formData) => {
-  try {
-    const response = await axios.post("/api/post", formData);
-    console.log(response);
-    return response.data;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-};
-
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export function CreatePost({ setUpdateTimeline }) {
+export function CreatePost({ handleSubmit, update, postId = "" }) {
   const [content, setContent] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [saverity, setSaverity] = useState("");
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const handleSubmitLocal = async (event) => {
     event.preventDefault();
     const email = session?.user?.email;
     try {
-      const response = await handleSubmit({ content, email });
-      console.log(response);
-      setUpdateTimeline((prev) => !prev);
+      const response = await handleSubmit({ content, email, postId });
+      update();
       setContent("");
-      setAlertMessage(response);
+      setAlertMessage(response.data);
       setSaverity("success");
       setShowAlert(true);
     } catch (error) {
-      setAlertMessage(error.response.data);
+      console.log(error);
+      setAlertMessage("ups, something wrong");
       setSaverity("error");
       setShowAlert(true);
     }
@@ -91,23 +87,32 @@ export function CreatePost({ setUpdateTimeline }) {
   );
 }
 
-export function CreatePostMobile({ open, handleClose, setUpdateTimeline }) {
+export function CreatePostMobile({
+  open,
+  handleClose,
+  update,
+  textButton,
+  replyingTo,
+  handleSubmit,
+  postId = "",
+}) {
   const [content, setContent] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [saverity, setSaverity] = useState("");
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
+  const email = session?.user?.email;
 
   const handleSubmitLocal = async (event) => {
     event.preventDefault();
-    const email = session?.user?.email;
     try {
-      const response = await handleSubmit({ content, email });
+      const response = await handleSubmit({ content, email, postId });
       handleClose();
-      setUpdateTimeline((prev) => !prev);
+      update();
       setContent("");
     } catch (error) {
-      setAlertMessage(error.response.data);
+      console.log(error);
+      setAlertMessage("ups, error");
       setSaverity("error");
       setShowAlert(true);
     }
@@ -156,7 +161,7 @@ export function CreatePostMobile({ open, handleClose, setUpdateTimeline }) {
               sx={{ px: 5, borderRadius: 28 }}
               onClick={handleSubmitLocal}
             >
-              Share
+              {textButton}
             </Button>
           </Toolbar>
         </AppBar>
@@ -164,7 +169,7 @@ export function CreatePostMobile({ open, handleClose, setUpdateTimeline }) {
         <TextField
           sx={{ my: 3, width: "80%", mx: "auto" }}
           id="outlined-textarea"
-          label="Share your story!"
+          label={replyingTo ? `Reply to ${replyingTo}` : "Share your story!"}
           multiline
           onChange={(e) => setContent(e.target.value)}
           value={content}

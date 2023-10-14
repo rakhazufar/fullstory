@@ -5,10 +5,12 @@ import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { CreatePost, CreatePostMobile } from "@components/CreatePost";
 import Posts from "@components/Post";
-import { usePosts } from "@hooks/usePosts";
+import { usePosts, useCreatePost } from "@hooks/usePosts";
 
 export default function Home() {
   const [updateTimeline, setUpdateTimeline] = useState(false);
+
+  const createPost = useCreatePost();
 
   const [open, setOpen] = useState(false);
 
@@ -20,6 +22,10 @@ export default function Home() {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleUpdateTimeline = () => {
+    setUpdateTimeline((prev) => !prev);
   };
 
   const fabStyle = {
@@ -42,9 +48,16 @@ export default function Home() {
           <CreatePostMobile
             open={open}
             handleClose={handleClose}
-            setUpdateTimeline={setUpdateTimeline}
+            update={handleUpdateTimeline}
+            textButton="Share"
+            replyingTo={false}
+            handleSubmit={createPost}
           />
-          <CreatePost setUpdateTimeline={setUpdateTimeline} />
+          <CreatePost
+            handleSubmit={createPost}
+            setUpdateTimeline={setUpdateTimeline}
+            update={handleUpdateTimeline}
+          />
           {allPosts ? (
             allPosts.map((post) => (
               <div key={post.id}>

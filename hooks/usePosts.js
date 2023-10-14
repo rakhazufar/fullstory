@@ -49,6 +49,21 @@ export const usePostsByUser = ({ email, reloadKey } = {}) => {
   return Posts;
 };
 
+export const useCreatePost = () => {
+  const createPost = async (formData) => {
+    console.log(formData);
+    try {
+      const response = await axios.post("/api/post", formData);
+      return response;
+    } catch (err) {
+      console.log("error when create post", err);
+      throw new Error(err.message);
+    }
+  };
+
+  return createPost;
+};
+
 export const useLikedPostsByUser = ({ email, reloadKey } = {}) => {
   const [Posts, setPosts] = useState([]);
   useEffect(() => {

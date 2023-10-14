@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   const body = await request.json();
-  const { content, slug, postId } = await body;
-  console.log(content, slug, postId);
+  const { content, email, postId } = await body;
+  console.log(content, email, postId);
 
   if (!content) {
     return new NextResponse("Please input your comment!", {
@@ -14,7 +14,7 @@ export async function POST(request) {
 
   const user = await prisma.user.findUnique({
     where: {
-      slug,
+      email,
     },
   });
 
@@ -38,17 +38,21 @@ export async function POST(request) {
 }
 
 export async function GET(request) {
+  const url = new URL(request.url);
+  const params = url.searchParams;
+  const postId = params.get("postId");
+  console.log(postId);
   try {
-    const allPost = await prisma.post.findMany({
-      orderBy: {
-        createdAt: "desc",
+    const allComment = await prisma.comment.findMany({
+      where: {
+        postId,
       },
       include: {
-        author: true,
+        user: true,
       },
     });
 
-    return NextResponse.json(allPost);
+    return NextResponse.json(allComment);
   } catch (err) {
     console.error(err);
     return new NextResponse("Internal Server Error", { status: 500 });

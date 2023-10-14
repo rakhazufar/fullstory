@@ -24,7 +24,7 @@ function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, loading } = useSession();
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);

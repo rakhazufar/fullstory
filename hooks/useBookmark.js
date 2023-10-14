@@ -42,7 +42,8 @@ export const useBookmarkByUser = ({ email, reloadKey }) => {
 
         setBookmarkPosts(data.data);
       } catch (err) {
-        return err;
+        console.log(err.message);
+        throw new Error(err.message);
       }
     };
 
@@ -58,18 +59,23 @@ export const useGetBookmarkValue = ({
   setBookmarked,
 }) => {
   useEffect(() => {
-    const checkBookmarked = async () => {
-      const bookmark = await axios.get("/api/bookmark/getBookmarkValue", {
-        params: {
-          postId,
-          email,
-        },
-      });
+    try {
+      const checkBookmarked = async () => {
+        const bookmark = await axios.get("/api/bookmark/getBookmarkValue", {
+          params: {
+            postId,
+            email,
+          },
+        });
 
-      setBookmarked(bookmark.data.isBookmarked);
-    };
+        setBookmarked(bookmark.data.isBookmarked);
+      };
 
-    checkBookmarked();
+      checkBookmarked();
+    } catch (err) {
+      console.log(err.message);
+      throw new Error(err.message);
+    }
   }, [session]);
 };
 
@@ -95,6 +101,7 @@ export const useHandleBookmark = (initialState, postId, email) => {
       }
     } catch (error) {
       console.log(error);
+      throw new Error(error.message);
     }
   };
 
