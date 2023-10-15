@@ -35,35 +35,43 @@ export const authOptions = {
   adapter: CustomPrismaAdapter,
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      try {
-        const existingUser = await prisma.user.findUnique({
-          where: {
-            email: user.email,
-          },
-        });
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          email: user.email,
+        },
+      });
+      if (existingUser) {
+        try {
+          // console.log(
+          //   "user nih",
+          //   user,
+          //   "account nih",
+          //   account,
+          //   "profile dong",
+          //   profile,
+          //   "email nich",
+          //   email,
+          //   "asik credentials",
+          //   credentials
+          // );
 
-        if (!existingUser) {
-          throw new Error(
-            "User not found or already registered with another method.or already lo"
-          );
+          const oauthAccount = await prisma.account.findFirst({
+            where: {
+              userId: existingUser.id,
+            },
+          });
+
+          if (oauthAccount && account.provider === "credentials") {
+            throw new Error("User already registered with another method.");
+          }
+
+          if (account.type === "oauth" && !oauthAccount) {
+            throw new Error("User already registered with another method.");
+          }
+        } catch (error) {
+          console.log("error:", error.message);
+          return `/login?error=${encodeURIComponent(error.message)}`;
         }
-
-        const oauthAccount = await prisma.account.findFirst({
-          where: {
-            userId: existingUser.id,
-          },
-        });
-
-        if (oauthAccount && account.provider === "credentials") {
-          throw new Error("User already registered with another method.");
-        }
-
-        if (account.type === "oauth" && !oauthAccount) {
-          throw new Error("User already registered with another method.");
-        }
-      } catch (error) {
-        console.log("error:", error.message);
-        return `/login?error=${encodeURIComponent(error.message)}`;
       }
 
       return true;

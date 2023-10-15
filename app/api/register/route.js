@@ -63,12 +63,14 @@ export async function POST(request) {
   if (newUser) {
     const token = await createActivateToken(newUser.id);
     console.log(token);
-    await sendEmail(
+    const emailSend = await sendEmail(
       "Fullstory Email Activation",
       newUser.email,
       `hallo selamat datang di fullstory, saya tau kamu tidak sabar untuk membagikan seluruh kisah kamu. tapi kamu harus aktivasi email kamu dulu!`,
       token
     );
+
+    console.log(emailSend);
   }
 
   const userWithoutPassword = exclude(newUser, ["hashedPassword"]);
