@@ -23,8 +23,7 @@ import { useRouter, usePathname } from "next/navigation";
 function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const router = useRouter();
-  const pathname = usePathname();
-  const { data: session, loading } = useSession();
+  const { data: session } = useSession();
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);

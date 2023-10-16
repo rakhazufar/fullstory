@@ -58,6 +58,24 @@ export const useGetComments = () => {
   return getComments;
 };
 
+export const useGetTotalComments = () => {
+  const getTotalComments = async (postId) => {
+    try {
+      const Posts = await axios.get("/api/comment/total", {
+        params: {
+          postId,
+        },
+      });
+
+      return Posts.data;
+    } catch (err) {
+      console.log(err);
+      throw new Error(err.message);
+    }
+  };
+
+  return getTotalComments;
+};
 // export const useLikedPostsByUser = ({ email, reloadKey } = {}) => {
 //   const [Posts, setPosts] = useState([]);
 //   useEffect(() => {

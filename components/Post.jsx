@@ -9,6 +9,9 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { CreatePostMobile } from "./CreatePost";
+import { useEffect, useState } from "react";
+import { useCreateComment, useGetTotalComments } from "@hooks/useComment";
 import { useLikes, useGetLikedValue, useHandleLike } from "@hooks/useLike";
 import {
   useBookmark,
@@ -19,9 +22,35 @@ import {
 export default function Post({ data }) {
   const { data: session } = useSession();
   const postId = data.id;
+  const [update, setUpdate] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [totalComment, setTotalComment] = useState(0);
   const { push } = useRouter();
   const createdAt = data.createdAt;
   const timeDifference = getTimeDifference(createdAt);
+
+  const createComment = useCreateComment();
+  const getTotalComment = useGetTotalComments();
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleUpdate = () => {
+    setUpdate((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const getComment = async () => {
+      const totalComment = await getTotalComment(postId);
+      setTotalComment(totalComment);
+    };
+    getComment();
+  }, []);
 
   const [bookmarked, setBookmarked, handleBookmark] = useHandleBookmark(
     false,
@@ -82,6 +111,15 @@ export default function Post({ data }) {
         borderColor: "black",
       }}
     >
+      <CreatePostMobile
+        open={open}
+        handleClose={handleClose}
+        textButton="Reply"
+        replyingTo={data.author.name}
+        handleSubmit={createComment}
+        update={handleUpdate}
+        postId={postId}
+      />
       <Box
         onClick={() => handleCheckProfile(data.author.slug)}
         sx={{
@@ -153,11 +191,9 @@ export default function Post({ data }) {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <ChatBubbleOutlineIcon
               style={{ cursor: "pointer" }}
-              onClick={() => {
-                handleLike("like");
-              }}
+              onClick={handleClickOpen}
             />
-            <Typography>{totalLikes}</Typography>
+            <Typography>{totalComment}</Typography>
           </Box>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

@@ -13,7 +13,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useLikes, useGetLikedValue, useHandleLike } from "@hooks/useLike";
 import { CreatePostMobile } from "@components/CreatePost";
-import { useCreateComment } from "@hooks/useComment";
+import { useCreateComment, useGetTotalComments } from "@hooks/useComment";
 import Comments from "@components/Comments";
 import {
   useBookmark,
@@ -24,12 +24,14 @@ import {
 function PostDetail({ params }) {
   const [postDetail, setPostDetail] = useState({});
   const [timeDifference, setTimeDifference] = useState("");
+  const [totalComment, setTotalComment] = useState(0);
   const postId = params.id;
   const [open, setOpen] = useState(false);
   const [update, setUpdate] = useState(false);
   const { push } = useRouter();
   const { data: session } = useSession();
   const createComment = useCreateComment();
+  const getTotalComment = useGetTotalComments();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -67,6 +69,11 @@ function PostDetail({ params }) {
     if (Object.keys(postDetail).length != 0) {
       const data = getTimeDifference(postDetail.createdAt);
       setTimeDifference(data);
+      const getComment = async () => {
+        const totalComment = getTotalComment(postDetail.id);
+        setTotalComment(totalComment);
+      };
+      getComment();
     }
   }, [postDetail]);
 
@@ -215,7 +222,7 @@ function PostDetail({ params }) {
                   style={{ cursor: "pointer" }}
                   onClick={handleClickOpen}
                 />
-                <Typography>{totalLikes}</Typography>
+                <Typography>{totalComment}</Typography>
               </Box>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
